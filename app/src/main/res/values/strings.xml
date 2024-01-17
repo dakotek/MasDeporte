@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MasDeporte</string>
+    <string name="login1">Iniciar Sesión</string>
+    <string name="login2">Inicio de sesión</string>
+    <string name="loginText">¿Ya tienes cuenta?</string>
+    <string name="signUp1">Registrarse</string>
+    <string name="signUp2">Registro</string>
+    <string name="signUpText">Si no tienes cuenta...</string>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "509295372709",
+    "project_id": "masdeporte-24321",
+    "storage_bucket": "masdeporte-24321.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509295372709:android:af5406c35aa949a195e04c",
+        "android_client_info": {
+          "package_name": "com.example.masdeporte"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq0_xN9batuq9E6a1nNSPaNUhkGVXYa2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
