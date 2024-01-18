@@ -134,7 +134,7 @@ fun SignUpScreen(
                     } else {
                         content = Color.White
                         launchSnackbar(
-                            message = "Usuario registrado",
+                            message = "Usuario registrado, redirigiendo...",
                             actionLabel = "Aceptar",
                             duration = SnackbarDuration.Long
                         )

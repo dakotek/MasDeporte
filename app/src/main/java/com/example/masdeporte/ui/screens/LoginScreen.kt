@@ -122,6 +122,7 @@ fun LoginScreen(
                             duration = SnackbarDuration.Long
                         )
                     } else {
+                        content = Color.White
                         launchSnackbar(
                             message = "Iniciando sesión...",
                             actionLabel = "Aceptar",
