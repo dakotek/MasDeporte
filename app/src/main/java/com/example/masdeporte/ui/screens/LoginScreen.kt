@@ -35,7 +35,10 @@ import com.example.masdeporte.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -94,9 +97,9 @@ fun LoginScreen(navController: NavController) {
         // Botón para iniciar sesión
         Button(
             onClick = {
-                // Buscar en la BBDD los datos que sean correctos
-                // Llevar a la pantalla del mapa
-                //navController.navigate("map")
+                viewModel.signInWithEmailAndPassword(email, password) {
+                    navController.navigate("map")
+                }
             },
             modifier = Modifier
                 .padding(8.dp)
