@@ -3,6 +3,7 @@ package com.example.masdeporte.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,11 +14,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.masdeporte.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +48,14 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val snackState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    fun launchSnackbar(message: String, actionLabel: String?=null,duration: SnackbarDuration = SnackbarDuration.Short) {
+        scope.launch {
+            snackState.showSnackbar(message = message,actionLabel=actionLabel, duration=duration)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -94,22 +109,51 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        var content = Color.White
         // Botón para iniciar sesión
-        Button(
-            onClick = {
-                viewModel.signInWithEmailAndPassword(email, password) {
-                    navController.navigate("map")
-                }
-            },
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(R.string.login1),
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold,
-            )
+        Box(contentAlignment = Alignment.Center) {
+            Button(
+                onClick = {
+                    if (email.isBlank() || password.isBlank()) {
+                        content = Color.Red
+                        launchSnackbar(
+                            message = "Debes de rellenar todos los campos",
+                            actionLabel = "Aceptar",
+                            duration = SnackbarDuration.Long
+                        )
+                    } else {
+                        launchSnackbar(
+                            message = "Iniciando sesión...",
+                            actionLabel = "Aceptar",
+                            duration = SnackbarDuration.Long
+                        )
+                        viewModel.signInWithEmailAndPassword(email, password) {
+                            if (viewModel.signInError.value == false) {
+                                navController.navigate("map")
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.login1),
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+        Box(modifier = Modifier.fillMaxSize(), Alignment.BottomCenter){
+            SnackbarHost(hostState = snackState) {
+                Snackbar(
+                    snackbarData = it,
+                    containerColor = Color.Black,
+                    contentColor = content
+                )
+            }
+
         }
 
         Spacer(modifier = Modifier.height(16.dp))

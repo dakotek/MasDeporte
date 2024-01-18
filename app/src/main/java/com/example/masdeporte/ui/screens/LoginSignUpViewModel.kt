@@ -1,6 +1,7 @@
 package com.example.masdeporte.ui.screens
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,8 @@ import kotlinx.coroutines.launch
 class LoginSignUpViewModel:ViewModel() {
     private val auth:FirebaseAuth = Firebase.auth
     private val _loading = MutableLiveData(false)
+    private val _signInError = MutableLiveData<Boolean>()
+    val signInError: LiveData<Boolean> get() = _signInError
 
     fun signInWithEmailAndPassword(email: String, password: String, home: () -> Unit) = viewModelScope.launch {
         try {
@@ -22,12 +25,15 @@ class LoginSignUpViewModel:ViewModel() {
                     if (task.isSuccessful) {
                         Log.d("MasDeporte", "signInWithEmailAndPassword logueado")
                         home()
+                        _signInError.value = false
                     } else {
                         Log.d("MasDeporte", "signInWithEmailAndPassword: ${task.result.toString()}")
+                        _signInError.value = true
                     }
                 }
         } catch (ex:Exception) {
             Log.d("MasDeporte", "signInWithEmailAndPassword: ${ex.message}")
+            _signInError.value = true
         }
     }
 
