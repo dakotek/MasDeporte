@@ -129,9 +129,7 @@ fun LoginScreen(
                             duration = SnackbarDuration.Long
                         )
                         viewModel.signInWithEmailAndPassword(email, password) {
-                            if (viewModel.signInError.value == false) {
-                                navController.navigate("map")
-                            }
+                            navController.navigate("map")
                         }
                     }
                 },

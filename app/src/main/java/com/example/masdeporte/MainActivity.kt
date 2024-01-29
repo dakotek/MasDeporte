@@ -8,7 +8,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.masdeporte.ui.screens.*
+import com.example.masdeporte.ui.screens.AboutAppScreen
+import com.example.masdeporte.ui.screens.AceptSitesAdminScreen
+import com.example.masdeporte.ui.screens.AddSitesScreen
+import com.example.masdeporte.ui.screens.FavoriteScreen
+import com.example.masdeporte.ui.screens.LoginScreen
+import com.example.masdeporte.ui.screens.MainScreen
+import com.example.masdeporte.ui.screens.MapScreen
+import com.example.masdeporte.ui.screens.SignUpScreen
 import com.example.masdeporte.ui.theme.MasDeporteTheme
 
 class MainActivity : ComponentActivity() {
@@ -62,7 +69,8 @@ fun MainScreenPreview() {
     MasDeporteTheme {
         //MainScreen()
         //ButtonsScreen()
-        LoginScreen(navController = rememberNavController())
+        //LoginScreen(navController = rememberNavController())
         //SignUpScreen()
+        MapScreen(navController = rememberNavController())
     }
 }
