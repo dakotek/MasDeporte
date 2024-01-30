@@ -9,7 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.masdeporte.ui.screens.AboutAppScreen
-import com.example.masdeporte.ui.screens.AceptSitesAdminScreen
+import com.example.masdeporte.ui.screens.AcceptSitesAdminScreen
 import com.example.masdeporte.ui.screens.AddSitesScreen
 import com.example.masdeporte.ui.screens.FavoriteScreen
 import com.example.masdeporte.ui.screens.LoginScreen
@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
                 //MainScreen()
                 val navController = rememberNavController()
 
-                NavHost(navController, startDestination = "main") {
+                NavHost(navController, startDestination = "map") {
                     // Pantalla Main
                     composable("main") {
                         MainScreen(navController = navController)
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                         AddSitesScreen(navController = navController)
                     }
                     composable("aceptSites") {
-                        AceptSitesAdminScreen(navController = navController)
+                        AcceptSitesAdminScreen(navController = navController)
                     }
                     composable("aboutApp") {
                         AboutAppScreen(navController = navController)

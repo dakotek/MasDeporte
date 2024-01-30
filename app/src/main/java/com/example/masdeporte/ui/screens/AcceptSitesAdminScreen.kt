@@ -39,7 +39,7 @@ import com.example.masdeporte.ui.theme.MasDeporteTheme
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoriteScreen(navController: NavController) {
+fun AcceptSitesAdminScreen(navController: NavController) {
     var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -115,7 +115,7 @@ fun FavoriteScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Mis favoritos y ¿Mi Perfil?",
+                text = "Confirmar sitios (ADMIN)",
                 fontSize = 35.sp,
                 fontWeight = FontWeight.ExtraBold,
                 textDecoration = TextDecoration.Underline
@@ -126,7 +126,7 @@ fun FavoriteScreen(navController: NavController) {
 
 @Composable
 @Preview(showBackground = true)
-fun FavoriteScreenPreview() {
+fun AcceptSitesAdminScreenPreview() {
     MasDeporteTheme {
         AboutAppScreen(navController = rememberNavController())
     }
