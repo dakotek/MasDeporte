@@ -39,7 +39,10 @@ import com.example.masdeporte.ui.theme.MasDeporteTheme
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutAppScreen(navController: NavController) {
+fun AboutAppScreen(
+    navController: NavController,
+    viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(

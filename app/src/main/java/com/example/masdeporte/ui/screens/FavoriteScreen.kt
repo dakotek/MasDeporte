@@ -39,8 +39,14 @@ import com.example.masdeporte.ui.theme.MasDeporteTheme
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoriteScreen(navController: NavController) {
+fun FavoriteScreen(
+    navController: NavController,
+    viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     var showMenu by remember { mutableStateOf(false) }
+    val userType = viewModel.getUserType()
+    val userName = viewModel.getUserName()
+    val userEmail = viewModel.getUserEmail()
 
     Scaffold(
         topBar = {
@@ -116,6 +122,24 @@ fun FavoriteScreen(navController: NavController) {
         ) {
             Text(
                 text = "Mis favoritos y ¿Mi Perfil?",
+                fontSize = 35.sp,
+                fontWeight = FontWeight.ExtraBold,
+                textDecoration = TextDecoration.Underline
+            )
+            Text(
+                text = "$userName",
+                fontSize = 35.sp,
+                fontWeight = FontWeight.ExtraBold,
+                textDecoration = TextDecoration.Underline
+            )
+            Text(
+                text = "$userEmail",
+                fontSize = 35.sp,
+                fontWeight = FontWeight.ExtraBold,
+                textDecoration = TextDecoration.Underline
+            )
+            Text(
+                text = "$userType",
                 fontSize = 35.sp,
                 fontWeight = FontWeight.ExtraBold,
                 textDecoration = TextDecoration.Underline

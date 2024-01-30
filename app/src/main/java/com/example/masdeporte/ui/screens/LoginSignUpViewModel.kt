@@ -1,7 +1,6 @@
 package com.example.masdeporte.ui.screens
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,8 +15,28 @@ class LoginSignUpViewModel:ViewModel() {
     private val auth:FirebaseAuth = Firebase.auth
     private val _loading = MutableLiveData(false)
     private val _signInError = MutableLiveData<Boolean>()
+    private val _userType = MutableLiveData<String>()
+    private val _userName = MutableLiveData<String>()
+    private val _userEmail = MutableLiveData<String>()
 
-    val signInError: LiveData<Boolean> get() = _signInError
+    private fun setUserName(name: String?) {
+        _userName.value = name
+    }
+    fun getUserName(): String? {
+        return _userName.value
+    }
+    private fun setUserEmail(email: String?) {
+        _userEmail.value = email
+    }
+    fun getUserEmail(): String? {
+        return _userEmail.value
+    }
+    private fun setUserType(type: String?) {
+        _userType.value = type
+    }
+    fun getUserType(): String? {
+        return _userType.value
+    }
 
     fun signInWithEmailAndPassword(email: String, password: String, onSignInComplete: (String?) -> Unit) = viewModelScope.launch {
         try {
@@ -27,6 +46,19 @@ class LoginSignUpViewModel:ViewModel() {
                         val uid = auth.currentUser?.uid
                         Log.d("MasDeporte", "signInWithEmailAndPassword logueado")
                         onSignInComplete(uid)
+
+                        // Obtener y establecer el tipo de usuario, nombre y correo electrónico
+                        if (uid != null) {
+                            checkUserDetailsByUid(uid) { userDetails ->
+                                if (userDetails != null) {
+                                    setUserType(userDetails.userType)
+                                    setUserName(userDetails.name)
+                                    setUserEmail(email)
+                                    Log.d("Detalles del usuario", "Tipo de usuario: ${_userType.value}, nombre: ${_userName.value} y correo electrónico: ${_userEmail.value}")
+                                }
+                            }
+                        }
+
                         _signInError.value = false
                     } else {
                         Log.d("MasDeporte", "signInWithEmailAndPassword: ${task.result.toString()}")
@@ -34,12 +66,13 @@ class LoginSignUpViewModel:ViewModel() {
                         _signInError.value = true
                     }
                 }
-        } catch (ex:Exception) {
+        } catch (ex: Exception) {
             Log.d("MasDeporte", "signInWithEmailAndPassword: ${ex.message}")
             onSignInComplete(null)
             _signInError.value = true
         }
     }
+
 
     fun createUserWithEmailAndPassword(name: String, email: String, password: String, home: () -> Unit) {
         if (_loading.value == false) {
@@ -75,21 +108,25 @@ class LoginSignUpViewModel:ViewModel() {
                 Log.d("MasDeporte", "Error usuario creado: ${it}")
             }
     }
-    fun checkUserTypeByUid(uid: String, onUserTypeReceived: (String?) -> Unit) {
+    data class UserDetails(val userType: String?, val name: String?)
+
+    fun checkUserDetailsByUid(uid: String, onUserDetailsReceived: (UserDetails?) -> Unit) {
         FirebaseFirestore.getInstance().collection("users")
             .whereEqualTo("user_id", uid)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (!querySnapshot.isEmpty) {
                     val userType = querySnapshot.documents[0].getString("userType")
-                    onUserTypeReceived(userType)
+                    val name = querySnapshot.documents[0].getString("name")
+                    val userDetails = UserDetails(userType, name)
+                    onUserDetailsReceived(userDetails)
                 } else {
-                    onUserTypeReceived(null)
+                    onUserDetailsReceived(null)
                 }
             }
             .addOnFailureListener { exception ->
-                Log.d("MasDeporte", "Error al obtener el tipo de usuario por UID: $exception")
-                onUserTypeReceived(null)
+                Log.d("MasDeporte", "Error al obtener detalles del usuario por UID: $exception")
+                onUserDetailsReceived(null)
             }
     }
 }
