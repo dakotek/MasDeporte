@@ -24,34 +24,38 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MasDeporteTheme {
-                //MainScreen()
                 val navController = rememberNavController()
 
-                NavHost(navController, startDestination = "map") {
-                    // Pantalla Main
+                NavHost(navController, startDestination = "main") {
+                    // Pantalla "Main"
                     composable("main") {
                         MainScreen(navController = navController)
                     }
-                    // Pantalla Login
+                    // Pantalla "Inicio de sesión"
                     composable("login") {
                         LoginScreen(navController = navController)
                     }
-                    // Pantalla SignUp
+                    // Pantalla "Registro"
                     composable("signUp") {
                         SignUpScreen(navController = navController)
                     }
+                    // Pantalla "Mapa"
                     composable("map") {
                         MapScreen(navController = navController)
                     }
+                    // Pantalla "Mis favoritos"
                     composable("favorite") {
                         FavoriteScreen(navController = navController)
                     }
+                    // Pantalla "Añadir sitio"
                     composable("addSites") {
                         AddSitesScreen(navController = navController)
                     }
+                    // Pantalla "Confirmar sitios (ADMIN)"
                     composable("aceptSites") {
                         AcceptSitesAdminScreen(navController = navController)
                     }
+                    // Pantalla "Más sobre la app..."
                     composable("aboutApp") {
                         AboutAppScreen(navController = navController)
                     }
@@ -71,6 +75,6 @@ fun MainScreenPreview() {
         //ButtonsScreen()
         //LoginScreen(navController = rememberNavController())
         //SignUpScreen()
-        MapScreen(navController = rememberNavController())
+        //MapScreen(navController = rememberNavController())
     }
 }

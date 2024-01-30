@@ -1,5 +1,6 @@
 package com.example.masdeporte.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +49,7 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isAdmin by  remember { mutableStateOf(false) }
 
     val snackState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -128,8 +130,26 @@ fun LoginScreen(
                             actionLabel = "Aceptar",
                             duration = SnackbarDuration.Long
                         )
-                        viewModel.signInWithEmailAndPassword(email, password) {
-                            navController.navigate("map")
+                        viewModel.signInWithEmailAndPassword(email, password) { uid ->
+                            if (uid != null) {
+                                Log.d("MasDeporte", "Inicio de sesión exitoso. UID del usuario: $uid")
+                                viewModel.checkUserTypeByUid(uid) { userType ->
+                                    if (userType != null) {
+                                        Log.d("MasDeporte", "Tipo de usuario obtenido: $userType")
+                                        if (userType == "ADMIN") {
+                                            isAdmin = true
+                                            Log.d("MasDeporte", "El usuario es ADMIN")
+                                        } else {
+                                            Log.d("MasDeporte", "El usuario es STANDARD")
+                                        }
+                                    } else {
+                                        Log.d("MasDeporte", "No se pudo obtener el tipo de usuario")
+                                    }
+                                }
+                                navController.navigate("map")
+                            } else {
+                                Log.d("MasDeporte", "Error durante el inicio de sesión")
+                            }
                         }
                     }
                 },

@@ -16,23 +16,27 @@ class LoginSignUpViewModel:ViewModel() {
     private val auth:FirebaseAuth = Firebase.auth
     private val _loading = MutableLiveData(false)
     private val _signInError = MutableLiveData<Boolean>()
+
     val signInError: LiveData<Boolean> get() = _signInError
 
-    fun signInWithEmailAndPassword(email: String, password: String, home: () -> Unit) = viewModelScope.launch {
+    fun signInWithEmailAndPassword(email: String, password: String, onSignInComplete: (String?) -> Unit) = viewModelScope.launch {
         try {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        val uid = auth.currentUser?.uid
                         Log.d("MasDeporte", "signInWithEmailAndPassword logueado")
-                        home()
+                        onSignInComplete(uid)
                         _signInError.value = false
                     } else {
                         Log.d("MasDeporte", "signInWithEmailAndPassword: ${task.result.toString()}")
+                        onSignInComplete(null)
                         _signInError.value = true
                     }
                 }
         } catch (ex:Exception) {
             Log.d("MasDeporte", "signInWithEmailAndPassword: ${ex.message}")
+            onSignInComplete(null)
             _signInError.value = true
         }
     }
@@ -69,6 +73,23 @@ class LoginSignUpViewModel:ViewModel() {
                 Log.d("MasDeporte", "Usuario creado: ${it.id}")
             }.addOnFailureListener {
                 Log.d("MasDeporte", "Error usuario creado: ${it}")
+            }
+    }
+    fun checkUserTypeByUid(uid: String, onUserTypeReceived: (String?) -> Unit) {
+        FirebaseFirestore.getInstance().collection("users")
+            .whereEqualTo("user_id", uid)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val userType = querySnapshot.documents[0].getString("userType")
+                    onUserTypeReceived(userType)
+                } else {
+                    onUserTypeReceived(null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("MasDeporte", "Error al obtener el tipo de usuario por UID: $exception")
+                onUserTypeReceived(null)
             }
     }
 }
