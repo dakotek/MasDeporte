@@ -1,6 +1,7 @@
 package com.example.masdeporte.ui.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,9 +46,20 @@ fun FavoriteScreen(
     viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val userType = viewModel.getUserType()
-    val userName = viewModel.getUserName()
-    val userEmail = viewModel.getUserEmail()
+
+    var userName by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
+    var userType by remember { mutableStateOf("") }
+
+    LaunchedEffect(viewModel) {
+        val user = viewModel.getUserFromDatabase()
+        user?.let {
+            userName = it.name
+            userEmail = it.email
+            userType = it.userType
+        }
+    }
+    Log.d("favoritosDatos", "$userName, $userEmail, $userType")
 
     Scaffold(
         topBar = {
@@ -127,22 +140,19 @@ fun FavoriteScreen(
                 textDecoration = TextDecoration.Underline
             )
             Text(
-                text = "$userName",
+                text = "Nombre: $userName",
                 fontSize = 35.sp,
-                fontWeight = FontWeight.ExtraBold,
-                textDecoration = TextDecoration.Underline
+                fontWeight = FontWeight.ExtraBold
             )
             Text(
-                text = "$userEmail",
+                text = "Correo: $userEmail",
                 fontSize = 35.sp,
-                fontWeight = FontWeight.ExtraBold,
-                textDecoration = TextDecoration.Underline
+                fontWeight = FontWeight.ExtraBold
             )
             Text(
-                text = "$userType",
+                text = "Tipo de usuario: $userType",
                 fontSize = 35.sp,
-                fontWeight = FontWeight.ExtraBold,
-                textDecoration = TextDecoration.Underline
+                fontWeight = FontWeight.ExtraBold
             )
         }
     }
@@ -152,6 +162,6 @@ fun FavoriteScreen(
 @Preview(showBackground = true)
 fun FavoriteScreenPreview() {
     MasDeporteTheme {
-        AboutAppScreen(navController = rememberNavController())
+        FavoriteScreen(navController = rememberNavController())
     }
 }

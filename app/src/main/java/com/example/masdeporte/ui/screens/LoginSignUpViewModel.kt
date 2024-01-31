@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.masdeporte.MainActivity
 import com.example.masdeporte.models.User
+import com.example.masdeporte.room.UserEntity
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -15,27 +17,11 @@ class LoginSignUpViewModel:ViewModel() {
     private val auth:FirebaseAuth = Firebase.auth
     private val _loading = MutableLiveData(false)
     private val _signInError = MutableLiveData<Boolean>()
-    private val _userType = MutableLiveData<String>()
-    private val _userName = MutableLiveData<String>()
-    private val _userEmail = MutableLiveData<String>()
 
-    private fun setUserName(name: String?) {
-        _userName.value = name
-    }
-    fun getUserName(): String? {
-        return _userName.value
-    }
-    private fun setUserEmail(email: String?) {
-        _userEmail.value = email
-    }
-    fun getUserEmail(): String? {
-        return _userEmail.value
-    }
-    private fun setUserType(type: String?) {
-        _userType.value = type
-    }
-    fun getUserType(): String? {
-        return _userType.value
+    private val userDao = MainActivity.database.userDao()
+
+    suspend fun getUserFromDatabase(): UserEntity? {
+        return userDao.getUser()
     }
 
     fun signInWithEmailAndPassword(email: String, password: String, onSignInComplete: (String?) -> Unit) = viewModelScope.launch {
@@ -51,10 +37,16 @@ class LoginSignUpViewModel:ViewModel() {
                         if (uid != null) {
                             checkUserDetailsByUid(uid) { userDetails ->
                                 if (userDetails != null) {
-                                    setUserType(userDetails.userType)
-                                    setUserName(userDetails.name)
-                                    setUserEmail(email)
-                                    Log.d("Detalles del usuario", "Tipo de usuario: ${_userType.value}, nombre: ${_userName.value} y correo electrónico: ${_userEmail.value}")
+                                    val nameUser =userDetails.name.toString()
+                                    val typeUser = userDetails.userType.toString()
+                                    viewModelScope.launch {
+                                        userDao.deleteAllUsers()
+                                        val user = UserEntity(uid, nameUser, email, typeUser)
+                                        userDao.insertUser(user)
+                                        Log.d("Detalles del usuario", "${getUserFromDatabase()}")
+                                    }
+                                    Log.d("Detalles del usuario", "$nameUser, $email, $typeUser, $uid")
+
                                 }
                             }
                         }
