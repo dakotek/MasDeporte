@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">MasDeporte</string>
+    <string name="copyright">© 2024 LaCompañia. Todos los derechos reservados</string>
+    <string name="desarrolladores">Desarrollado por: David Sánchez y Guillermo Fernández</string>
+    <string name="descripcion">
+        Descubre y comparte lugares deportivos con nuestra aplicación. Crea tu propia guía de lugares
+        deportivos fuera de Google Maps. ¡Explora y comparte tu pasión por el deporte en cada rincón!
+    </string>
     <string name="login1">Iniciar Sesión</string>
     <string name="login2">Inicio de sesión</string>
     <string name="loginText">¿Ya tienes cuenta?</string>
