@@ -1,7 +1,6 @@
 package com.example.masdeporte.ui.screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -50,16 +49,18 @@ fun FavoriteScreen(
     var userName by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf("") }
+    var userUid by remember { mutableStateOf("") }
 
     LaunchedEffect(viewModel) {
         val user = viewModel.getUserFromDatabase()
         user?.let {
+            userUid = it.userId
             userName = it.name
             userEmail = it.email
             userType = it.userType
+            showMenu = false
         }
     }
-    Log.d("favoritosDatos", "$userName, $userEmail, $userType")
 
     Scaffold(
         topBar = {
@@ -103,15 +104,19 @@ fun FavoriteScreen(
                             },
                             contentPadding = PaddingValues(8.dp),
                         )
-                        DropdownMenuItem(
-                            text = { Text("Confirmar sitios (ADMIN)") },
-                            onClick = { navController.navigate("aceptSites") },
-                            leadingIcon = {
-                                Icon(ImageVector.vectorResource(id = R.drawable.baseline_admin_panel_settings_24),
-                                    contentDescription = null)
-                            },
-                            contentPadding = PaddingValues(8.dp),
-                        )
+                        if (userType == "ADMIN") {
+                            DropdownMenuItem(
+                                text = { Text("Confirmar sitios (ADMIN)") },
+                                onClick = { navController.navigate("aceptSites") },
+                                leadingIcon = {
+                                    Icon(
+                                        ImageVector.vectorResource(id = R.drawable.baseline_admin_panel_settings_24),
+                                        contentDescription = null
+                                    )
+                                },
+                                contentPadding = PaddingValues(8.dp),
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text("Más sobre la app…") },
                             onClick = { navController.navigate("aboutApp") },
