@@ -46,7 +46,6 @@ class LoginSignUpViewModel:ViewModel() {
                                         Log.d("Detalles del usuario", "${getUserFromDatabase()}")
                                     }
                                     Log.d("Detalles del usuario", "$nameUser, $email, $typeUser, $uid")
-
                                 }
                             }
                         }

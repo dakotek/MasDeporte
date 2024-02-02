@@ -36,6 +36,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.masdeporte.R
 import com.example.masdeporte.ui.theme.MasDeporteTheme
+import com.google.maps.android.compose.GoogleMap
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,8 +145,16 @@ fun MapScreen(
                 fontWeight = FontWeight.ExtraBold,
                 textDecoration = TextDecoration.Underline
             )
+            MyGoogleMaps()
         }
     }
+}
+
+@Composable
+fun MyGoogleMaps() {
+    GoogleMap(
+        modifier = Modifier.fillMaxSize()
+    )
 }
 
 @Composable
