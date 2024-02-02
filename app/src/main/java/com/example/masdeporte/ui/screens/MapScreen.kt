@@ -28,15 +28,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.masdeporte.R
 import com.example.masdeporte.ui.theme.MasDeporteTheme
-import com.google.maps.android.compose.GoogleMap
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -139,22 +136,9 @@ fun MapScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Mapa",
-                fontSize = 35.sp,
-                fontWeight = FontWeight.ExtraBold,
-                textDecoration = TextDecoration.Underline
-            )
             MyGoogleMaps()
         }
     }
-}
-
-@Composable
-fun MyGoogleMaps() {
-    GoogleMap(
-        modifier = Modifier.fillMaxSize()
-    )
 }
 
 @Composable
