@@ -13,11 +13,10 @@ import androidx.room.Room
 import com.example.masdeporte.room.AppDatabase
 import com.example.masdeporte.ui.screens.AboutAppScreen
 import com.example.masdeporte.ui.screens.AcceptSitesAdminScreen
-import com.example.masdeporte.ui.screens.AddSitesScreen
-import com.example.masdeporte.ui.screens.FavoriteScreen
 import com.example.masdeporte.ui.screens.LoginScreen
 import com.example.masdeporte.ui.screens.MainScreen
 import com.example.masdeporte.ui.screens.MapScreen
+import com.example.masdeporte.ui.screens.ProfileScreen
 import com.example.masdeporte.ui.screens.SignUpScreen
 import com.example.masdeporte.ui.theme.MasDeporteTheme
 
@@ -59,12 +58,8 @@ class MainActivity : ComponentActivity() {
                             MapScreen(navController = navController)
                         }
                         // Pantalla "Mis favoritos"
-                        composable("favorite") {
-                            FavoriteScreen(navController = navController)
-                        }
-                        // Pantalla "Añadir sitio"
-                        composable("addSites") {
-                            AddSitesScreen(navController = navController)
+                        composable("profile") {
+                            ProfileScreen(navController = navController)
                         }
                         // Pantalla "Confirmar sitios (ADMIN)"
                         composable("aceptSites") {
@@ -90,10 +85,6 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 fun MainScreenPreview() {
     MasDeporteTheme {
-        //MainScreen()
-        //ButtonsScreen()
-        //LoginScreen(navController = rememberNavController())
-        //SignUpScreen()
-        //MapScreen(navController = rememberNavController())
+
     }
 }

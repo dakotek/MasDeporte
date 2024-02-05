@@ -92,19 +92,10 @@ fun AboutAppScreen(
                             contentPadding = PaddingValues(8.dp),
                         )
                         DropdownMenuItem(
-                            text = { Text("Mis favoritos") },
-                            onClick = { navController.navigate("favorite") },
+                            text = { Text("Mi perfil") },
+                            onClick = { navController.navigate("profile") },
                             leadingIcon = {
-                                Icon(ImageVector.vectorResource(id = R.drawable.baseline_favorite_border_24),
-                                    contentDescription = null)
-                            },
-                            contentPadding = PaddingValues(8.dp),
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Añadir Sitio") },
-                            onClick = { navController.navigate("addSites") },
-                            leadingIcon = {
-                                Icon(ImageVector.vectorResource(id = R.drawable.baseline_add_location_alt_24),
+                                Icon(ImageVector.vectorResource(id = R.drawable.baseline_person_24),
                                     contentDescription = null)
                             },
                             contentPadding = PaddingValues(8.dp),
