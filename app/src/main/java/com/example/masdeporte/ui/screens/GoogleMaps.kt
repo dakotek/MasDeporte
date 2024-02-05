@@ -53,7 +53,7 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
     cameraPositionState.position = CameraPosition(currentLocation, 5f, 0f, 0f)
 
     coroutineScope.launch {
-        markers = loadMarkersFromDatabase()
+        markers = loadMarkersFromDatabase().filter { it["accepted"] == true }
     }
 
     GoogleMap(
