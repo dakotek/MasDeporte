@@ -69,11 +69,12 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
             val sport = markerData["sport"] as String
             val description = markerData["description"] as String
             val rating = (markerData["rating"] as Long).toInt()
+            val addedByUserEmail =  markerData["addedByUserEmail"] as String
 
             Marker(
                 position = position,
                 onClick = {
-                    showMarkerDetailsDialog(context, title, sport, description, rating)
+                    showMarkerDetailsDialog(context, title, sport, description, rating, addedByUserEmail)
                     true
                 }
             )
@@ -144,6 +145,7 @@ private fun showMarkerDetailsDialog(
     sport: String,
     description: String,
     rating: Int,
+    addedByUserEmail: String
 ) {
     val builder = AlertDialog.Builder(context)
 
@@ -206,8 +208,14 @@ private fun showMarkerDetailsDialog(
         )
         starsLayout.addView(starImageView)
     }
-
     layout.addView(starsLayout)
+
+    val addedByUserEmailTextView = TextView(context)
+    addedByUserEmailTextView.text = "Añadido por: $addedByUserEmail"
+    addedByUserEmailTextView.gravity = Gravity.CENTER
+    addedByUserEmailTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+    addMarginBottom(addedByUserEmailTextView)
+    layout.addView(addedByUserEmailTextView)
 
     builder.setView(layout)
 
