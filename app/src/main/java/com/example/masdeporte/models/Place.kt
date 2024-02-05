@@ -1,25 +1,12 @@
 package com.example.masdeporte.models
 
 data class Place(
-    val placeId: String,
-    val name: String,
-    val location: Location,
-    val category: Category,
-    val comment: String,
-    val rating: Float,
-    val addedByUserId: String
-)
-
-data class Location(
+    val title: String,
+    val sport: String,
+    val description: String,
+    val rating: Int,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val addedByUserEmail: String,
+    val accepted: Boolean,
 )
-
-enum class Category {
-    SKATE,
-    FUTBOL,
-    PARKOUR,
-    BALONCESTO,
-    ESCALADA,
-    BICI
-}
