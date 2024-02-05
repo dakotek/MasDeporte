@@ -1,10 +1,14 @@
 package com.example.masdeporte.ui.screens
 
+import android.Manifest
 import android.R
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Typeface
+import android.health.connect.datatypes.ExerciseRoute
+import android.location.Location
 import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
@@ -18,16 +22,22 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,6 +48,9 @@ import kotlinx.coroutines.withContext
 @Composable
 fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope) {
     var markers by remember { mutableStateOf(emptyList<Map<String, Any>>()) }
+    val cameraPositionState = rememberCameraPositionState {}
+    val currentLocation = LatLng(40.4168, -3.7038)
+    cameraPositionState.position = CameraPosition(currentLocation, 5f, 0f, 0f)
 
     coroutineScope.launch {
         markers = loadMarkersFromDatabase()
@@ -47,7 +60,8 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
         modifier = Modifier.fillMaxSize(),
         onMapClick = { latLng ->
             showDialogMakeMarker(context, latLng, email)
-        }
+        },
+        cameraPositionState = cameraPositionState,
     ) {
         markers.forEach { markerData ->
             val position = LatLng(markerData["latitude"] as Double, markerData["longitude"] as Double)
@@ -99,8 +113,8 @@ private fun showDialogMakeMarker(context: Context, latLng: LatLng, email: String
     chooseRating.text = "Valoración"
     layout.addView(chooseRating)
     val ratingSpinner = Spinner(context)
-    val rating = arrayOf(1, 2, 3, 4, 5)
-    val ratingAdapter = ArrayAdapter(context, R.layout.simple_spinner_item, rating)
+    val ratingArray = arrayOf(1, 2, 3, 4, 5)
+    val ratingAdapter = ArrayAdapter(context, R.layout.simple_spinner_item, ratingArray)
     ratingAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
     ratingSpinner.adapter = ratingAdapter
     layout.addView(ratingSpinner)
@@ -112,7 +126,7 @@ private fun showDialogMakeMarker(context: Context, latLng: LatLng, email: String
         val title = titleEditText.text.toString()
         val sport = sports[sportSpinner.selectedItemPosition]
         val description = descriptionEditText.text.toString()
-        val rating = rating[ratingSpinner.selectedItemPosition]
+        val rating = ratingArray[ratingSpinner.selectedItemPosition]
 
         addMarkerToDatabase(latLng, title, sport, description, rating, email)
     }
@@ -262,5 +276,3 @@ suspend fun loadMarkersFromDatabase(): List<Map<String, Any>> = withContext(Disp
 
     markers
 }
-
-
