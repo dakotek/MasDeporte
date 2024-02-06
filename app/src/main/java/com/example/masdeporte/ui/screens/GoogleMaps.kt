@@ -52,7 +52,7 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
     var markers by remember { mutableStateOf(emptyList<Map<String, Any>>()) }
     val cameraPositionState = rememberCameraPositionState {}
     val currentLocation = LatLng(40.4168, -3.7038)
-    cameraPositionState.position = CameraPosition(currentLocation, 5f, 0f, 0f)
+    cameraPositionState.position = CameraPosition(currentLocation, 8f, 0f, 0f)
 
     coroutineScope.launch {
         markers = loadMarkersFromDatabase().filter { it["accepted"] == true }

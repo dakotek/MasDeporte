@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -283,10 +284,36 @@ fun ProfileScreen(
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Button(
-                                    onClick =  { navController.navigate("map") }
+
+                                val iconSport = when (sport) {
+                                    "Fútbol" -> R.drawable.futbolmarker
+                                    "Baloncesto" -> R.drawable.baloncestomarker
+                                    "Escalada" -> R.drawable.escaladamarker
+                                    "Parkour" -> R.drawable.parkourmarker
+                                    "Skate" -> R.drawable.skatemarker
+                                    "Bici" -> R.drawable.bicimarker
+                                    "Fronton" -> R.drawable.frontonmarker
+                                    "Tenis" -> R.drawable.tenismarker
+                                    "Otro" -> R.drawable.otromarker
+                                    else -> R.drawable.otromarker
+                                }
+
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
                                 ) {
-                                    Text("Ver en el mapa")
+                                    Button(
+                                        onClick = { navController.navigate("map") }
+                                    ) {
+                                        Text("Ver en el mapa")
+                                    }
+                                    Spacer(modifier = Modifier.width(30.dp))
+                                    Image(
+                                        painter = painterResource(id = iconSport),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(60.dp)
+                                    )
                                 }
                             }
                         }
