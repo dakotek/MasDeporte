@@ -1,9 +1,11 @@
 package com.example.masdeporte.ui.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +48,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.masdeporte.R
 import com.example.masdeporte.ui.theme.MasDeporteTheme
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +65,8 @@ fun ProfileScreen(
     var userType by remember { mutableStateOf("") }
     var userUid by remember { mutableStateOf("") }
 
+    var favoriteSitesDetails by remember { mutableStateOf<List<Map<String, Any>>?>(null) }
+
     LaunchedEffect(viewModel) {
         val user = viewModel.getUserFromDatabase()
         user?.let {
@@ -67,6 +76,7 @@ fun ProfileScreen(
             userType = it.userType
             showMenu = false
         }
+        favoriteSitesDetails = loadFavoriteSitesDetails(userEmail)
     }
 
     Scaffold(
@@ -205,34 +215,102 @@ fun ProfileScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
-            item {
-                Text(
-                    text = "NO HAY SITIOS GUARDADOS, VE AL MAPA PARA GUARDAR TUS SITIOS FAVORITOS",
-                    fontSize = 18.sp,
-                )
+            if (favoriteSitesDetails.isNullOrEmpty()) {
+                Log.d("ProfileScreen", "favoritesSitesDetails: $favoriteSitesDetails")
+                item {
+                    Text(
+                        text = "NO HAY SITIOS GUARDADOS, VE AL MAPA PARA GUARDAR TUS SITIOS FAVORITOS",
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            } else {
+                favoriteSitesDetails?.forEach { siteDetails ->
+                    val title = siteDetails["title"] as String
+                    val sport = siteDetails["sport"] as String
+                    val description = siteDetails["description"] as String
+                    val rating = siteDetails["rating"] as Long
+                    val latitude = siteDetails["latitude"] as Double
+                    val longitude = siteDetails["longitude"] as Double
+                    Log.d("ProfileScreen", "Detalles del sitio favorito $siteDetails")
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = title,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = sport,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = description,
+                                    fontSize = 14.sp,
+                                )
+                                Text(
+                                    text = "Valoración: $rating estrellas",
+                                    fontSize = 14.sp,
+                                )
+                                Button(
+                                    onClick = {
+                                        // Acción al hacer clic en el botón, como abrir la ubicación en el mapa
+                                    }
+                                ) {
+                                    Text("Ver en el mapa")
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            /*
-            // Lista de sitios favoritos utilizando LazyColumn
-            items(/*favoriteSites*/) { site ->
-                //... Reemplazar con la lógica para mostrar sitios favoritos
-                // FavoriteSiteItem(site = site)
-            }
-
-             */
         }
     }
 }
-/*
+suspend fun loadFavoriteSitesDetails(userEmail: String): List<Map<String, Any>>? {
+    Log.d("ProfileScreen", "Iniciando carga de detalles de favoritos para el usuario: $userEmail")
+    val firestore = FirebaseFirestore.getInstance()
 
-@Composable
-fun FavoriteSiteItem(site: String) {
-    Text(
-        text = "• $site",
-        fontSize = 16.sp,
-        modifier = Modifier.padding(start = 16.dp)
-    )
+    return try {
+        val querySnapshot = firestore.collection("favorites")
+            .whereEqualTo("email", userEmail)
+            .get()
+            .await()
+
+        if (!querySnapshot.isEmpty) {
+            val favorites = querySnapshot.documents[0].get("favorites") as? List<String>
+            val favoriteSitesDetails = mutableListOf<Map<String, Any>>()
+
+            favorites?.forEach { favoriteId ->
+                Log.d("ProfileScreen", "Obteniendo detalles del favorito con ID: $favoriteId")
+                val markerSnapshot = firestore.collection("markers")
+                    .whereEqualTo("markerId", favoriteId)
+                    .get()
+                    .await()
+
+                for (document in markerSnapshot) {
+                    favoriteSitesDetails.add(document.data)
+                    Log.d("ProfileScreen", "Añadido: ${document.data}")
+                }
+            }
+            favoriteSitesDetails
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        Log.e("ProfileScreen", "Error al cargar los detalles de los sitios favoritos del usuario", e)
+        null
+    }
 }
-*/
 
 @Composable
 @Preview(showBackground = true)
