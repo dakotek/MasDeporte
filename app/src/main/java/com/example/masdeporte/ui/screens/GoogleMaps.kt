@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.FirebaseFirestore
@@ -73,12 +74,26 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
             val addedByUserEmail =  markerData["addedByUserEmail"] as String
             val markerId = markerData["markerId"] as String
 
+            val iconSport = when (sport) {
+                "Fútbol" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.futbolmarker)
+                "Baloncesto" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.baloncestomarker)
+                "Escalada" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.escaladamarker)
+                "Parkour" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.parkourmarker)
+                "Skate" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.skatemarker)
+                "Bici" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.bicimarker)
+                "Fronton" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.frontonmarker)
+                "Tenis" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.tenismarker)
+                "Otro" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.otromarker)
+                else -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.otromarker)
+            }
+
             Marker(
                 position = position,
+                icon = iconSport,
                 onClick = {
                     showMarkerDetailsDialog(context, title, sport, description, rating, addedByUserEmail, markerId, email)
                     true
-                }
+                },
             )
         }
     }
