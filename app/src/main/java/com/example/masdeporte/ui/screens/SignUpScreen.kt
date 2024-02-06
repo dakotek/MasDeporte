@@ -154,18 +154,7 @@ fun SignUpScreen(
                 )
             }
         }
-        Box(modifier = Modifier.fillMaxSize(), Alignment.BottomCenter){
-            SnackbarHost(hostState = snackState) {
-                Snackbar(
-                    snackbarData = it,
-                    containerColor = Color.Black,
-                    contentColor = content
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = stringResource(R.string.loginText),
             fontSize = 25.sp,
@@ -181,6 +170,15 @@ fun SignUpScreen(
                 navController.navigate("login")
             }
         )
+        Box(modifier = Modifier.fillMaxSize(), Alignment.BottomCenter){
+            SnackbarHost(hostState = snackState) {
+                Snackbar(
+                    snackbarData = it,
+                    containerColor = Color.Black,
+                    contentColor = content
+                )
+            }
+        }
     }
 }
 
