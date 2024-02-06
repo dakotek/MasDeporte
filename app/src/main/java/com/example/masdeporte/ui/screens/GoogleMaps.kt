@@ -43,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
@@ -70,11 +71,12 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
             val description = markerData["description"] as String
             val rating = (markerData["rating"] as Long).toInt()
             val addedByUserEmail =  markerData["addedByUserEmail"] as String
+            val markerId = markerData["markerId"] as String
 
             Marker(
                 position = position,
                 onClick = {
-                    showMarkerDetailsDialog(context, title, sport, description, rating, addedByUserEmail)
+                    showMarkerDetailsDialog(context, title, sport, description, rating, addedByUserEmail, markerId, email)
                     true
                 }
             )
@@ -145,7 +147,9 @@ private fun showMarkerDetailsDialog(
     sport: String,
     description: String,
     rating: Int,
-    addedByUserEmail: String
+    addedByUserEmail: String,
+    markerId: String,
+    userEmail: String,
 ) {
     val builder = AlertDialog.Builder(context)
 
@@ -217,7 +221,60 @@ private fun showMarkerDetailsDialog(
     addMarginBottom(addedByUserEmailTextView)
     layout.addView(addedByUserEmailTextView)
 
+    val favoritesButton = ImageView(context)
+    var isFavorite = false // Variable de estado para rastrear si el marcador está en favoritos
+
+    // Verificar si el marcador está en favoritos de forma asíncrona
+    isMarkerInFavorites(markerId, userEmail) { result ->
+        isFavorite = result // Actualizar la variable de estado
+        if (isFavorite) {
+            favoritesButton.setImageResource(com.example.masdeporte.R.drawable.baseline_favorite_24)
+        } else {
+            favoritesButton.setImageResource(com.example.masdeporte.R.drawable.baseline_favorite_border_24)
+        }
+
+        layout.addView(favoritesButton)
+        addMarginBottom(favoritesButton)
+
+        // Manejar clic en el botón de favoritos
+        favoritesButton.setOnClickListener {
+            if (isFavorite) {
+                removeMarkerFromFavorites(markerId, userEmail)
+                favoritesButton.setImageResource(com.example.masdeporte.R.drawable.baseline_favorite_border_24)
+                isFavorite = false // Actualizar la variable de estado
+            } else {
+                addMarkerToFavorites(markerId, userEmail)
+                favoritesButton.setImageResource(com.example.masdeporte.R.drawable.baseline_favorite_24)
+                isFavorite = true // Actualizar la variable de estado
+            }
+        }
+    }
+
     builder.setView(layout)
+
+    val firestore = FirebaseFirestore.getInstance()
+    val favoritesCollection = firestore.collection("favorites")
+
+    // Verificar si el usuario tiene un documento en la colección "favorites"
+    favoritesCollection
+        .whereEqualTo("email", userEmail)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (documents.isEmpty) {
+                // Si el usuario no tiene un documento en la colección "favorites", crear uno nuevo
+                val data = hashMapOf(
+                    "email" to userEmail,
+                    "favorites" to emptyList<String>()
+                )
+                favoritesCollection.add(data)
+                    .addOnSuccessListener {
+                        Log.d("MasDeporte", "Se creó un nuevo documento en la colección 'favorites'")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("MasDeporte", "Error al crear un nuevo documento en la colección 'favorites'", e)
+                    }
+            }
+        }
 
     builder.setPositiveButton("Cerrar") { dialog, _ ->
         dialog.dismiss()
@@ -226,6 +283,75 @@ private fun showMarkerDetailsDialog(
     builder.show()
 }
 
+private fun isMarkerInFavorites(markerId: String, userEmail: String, callback: (Boolean) -> Unit) {
+    val firestore = FirebaseFirestore.getInstance()
+    val favoritesCollection = firestore.collection("favorites")
+
+    favoritesCollection
+        .whereEqualTo("email", userEmail)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                val favorites = documents.documents[0].get("favorites") as? List<String> ?: emptyList()
+                val isFavorite = favorites.contains(markerId)
+                callback(isFavorite)
+            } else {
+                callback(false)
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al verificar si el marcador está en favoritos", e)
+            callback(false)
+        }
+}
+
+private fun addMarkerToFavorites(markerId: String, userEmail: String) {
+    val firestore = FirebaseFirestore.getInstance()
+    val favoritesCollection = firestore.collection("favorites")
+
+    favoritesCollection
+        .whereEqualTo("email", userEmail)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                val documentId = documents.documents[0].id
+                val favorites = documents.documents[0].get("favorites") as? MutableList<String> ?: mutableListOf()
+                favorites.add(markerId)
+                favoritesCollection.document(documentId)
+                    .update("favorites", favorites)
+                    .addOnFailureListener { e ->
+                        Log.e("MasDeporte", "Error al agregar el marcador a favoritos", e)
+                    }
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al obtener el documento de favoritos del usuario", e)
+        }
+}
+
+private fun removeMarkerFromFavorites(markerId: String, userEmail: String) {
+    val firestore = FirebaseFirestore.getInstance()
+    val favoritesCollection = firestore.collection("favorites")
+
+    favoritesCollection
+        .whereEqualTo("email", userEmail)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                val documentId = documents.documents[0].id
+                val favorites = documents.documents[0].get("favorites") as? MutableList<String> ?: mutableListOf()
+                favorites.remove(markerId)
+                favoritesCollection.document(documentId)
+                    .update("favorites", favorites)
+                    .addOnFailureListener { e ->
+                        Log.e("MasDeporte", "Error al eliminar el marcador de favoritos", e)
+                    }
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al obtener el documento de favoritos del usuario", e)
+        }
+}
 
 private fun addMarginBottom(view: View) {
     val layoutParams = LinearLayout.LayoutParams(
@@ -255,7 +381,8 @@ private fun addMarkerToDatabase(latLng: LatLng, title: String, sport: String, de
         "latitude" to latLng.latitude,
         "longitude" to latLng.longitude,
         "addedByUserEmail" to addedByUserEmail,
-        "accepted" to false
+        "accepted" to false,
+        "markerId" to UUID.randomUUID().toString()
     )
 
     firestore.collection("markers")
