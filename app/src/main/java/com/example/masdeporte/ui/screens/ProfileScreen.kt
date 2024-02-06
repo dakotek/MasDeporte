@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -248,23 +250,41 @@ fun ProfileScreen(
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold
                                 )
+                                Spacer(modifier = Modifier.height(10.dp))
                                 Text(
                                     text = sport,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )
+                                Spacer(modifier = Modifier.height(10.dp))
                                 Text(
                                     text = description,
                                     fontSize = 14.sp,
                                 )
-                                Text(
-                                    text = "Valoración: $rating estrellas",
-                                    fontSize = 14.sp,
-                                )
-                                Button(
-                                    onClick = {
-                                        // Acción al hacer clic en el botón, como abrir la ubicación en el mapa
+                                Spacer(modifier = Modifier.height(10.dp))
+                                if (rating > 1) {
+                                    Text(
+                                        text = "Valorada en $rating estrellas",
+                                        fontSize = 14.sp,
+                                    )
+                                } else {
+                                    Text(
+                                        text = "Valorada en $rating estrella",
+                                        fontSize = 14.sp,
+                                    )
+                                }
+                                Row {
+                                    repeat(rating.toInt()) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.baseline_star_24),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp)
+                                        )
                                     }
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Button(
+                                    onClick =  { navController.navigate("map") }
                                 ) {
                                     Text("Ver en el mapa")
                                 }

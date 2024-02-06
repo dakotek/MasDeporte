@@ -185,9 +185,9 @@ private fun showMarkerDetailsDialog(
 
     val ratingTextView = TextView(context)
     if (rating > 1) {
-        ratingTextView.text = "Valorada en: $rating estrellas"
+        ratingTextView.text = "Valorada en $rating estrellas"
     } else {
-        ratingTextView.text = "Valorada en: $rating estrella"
+        ratingTextView.text = "Valorada en $rating estrella"
     }
     ratingTextView.gravity = Gravity.CENTER
     ratingTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
