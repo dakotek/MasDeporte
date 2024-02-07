@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -244,7 +246,10 @@ fun AcceptSitesAdminScreen(
                                             onClick = {
                                                 acceptSite(markerId)
                                                 visibleSiteIds = visibleSiteIds + markerId
-                                            }
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color.Green,
+                                                contentColor = Color.Black)
                                         ) {
                                             Text("Aceptar")
                                         }
@@ -253,7 +258,10 @@ fun AcceptSitesAdminScreen(
                                             onClick = {
                                                 denySite(markerId)
                                                 visibleSiteIds = visibleSiteIds + markerId
-                                            }
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color.Red,
+                                                contentColor = Color.Black)
                                         ) {
                                             Text("Denegar")
                                         }
