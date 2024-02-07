@@ -233,8 +233,6 @@ fun ProfileScreen(
                     val sport = siteDetails["sport"] as String
                     val description = siteDetails["description"] as String
                     val rating = siteDetails["rating"] as Long
-                    val latitude = siteDetails["latitude"] as Double
-                    val longitude = siteDetails["longitude"] as Double
                     Log.d("ProfileScreen", "Detalles del sitio favorito $siteDetails")
                     item {
                         Card(

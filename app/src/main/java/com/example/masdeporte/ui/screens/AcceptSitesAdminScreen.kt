@@ -1,13 +1,24 @@
 package com.example.masdeporte.ui.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,10 +36,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,6 +48,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.masdeporte.R
 import com.example.masdeporte.ui.theme.MasDeporteTheme
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +66,9 @@ fun AcceptSitesAdminScreen(
     var userType by remember { mutableStateOf("") }
     var userUid by remember { mutableStateOf("") }
 
+    var sitesToAccept by remember { mutableStateOf<List<Map<String, Any>>?>(null) }
+    var visibleSiteIds by remember { mutableStateOf(emptySet<String>()) }
+
     LaunchedEffect(viewModel) {
         val user = viewModel.getUserFromDatabase()
         user?.let {
@@ -59,6 +78,7 @@ fun AcceptSitesAdminScreen(
             userType = it.userType
             showMenu = false
         }
+        sitesToAccept = loadSitesToAccept()
     }
 
     Scaffold(
@@ -121,21 +141,203 @@ fun AcceptSitesAdminScreen(
             )
         }
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Confirmar sitios (ADMIN)",
-                fontSize = 35.sp,
-                fontWeight = FontWeight.ExtraBold,
-                textDecoration = TextDecoration.Underline
-            )
+            item {
+                Text(
+                    text = "Confirmar sitios",
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.padding(top = 45.dp)
+                )
+            }
+            if (sitesToAccept.isNullOrEmpty() || (sitesToAccept?.size == visibleSiteIds.size)) {
+                item {
+                    Text(
+                        text = "NO HAY SITIOS PARA REVISAR Y ACEPTAR. CUANDO ALGUIEN AÑADA MÁS SITIOS SE MOSTRARÁN AQUI",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            } else {
+                sitesToAccept?.forEach { siteDetails ->
+                    val title = siteDetails["title"] as String
+                    val sport = siteDetails["sport"] as String
+                    val description = siteDetails["description"] as String
+                    val rating = siteDetails["rating"] as Long
+                    val latitude = siteDetails["latitude"] as Double
+                    val longitude = siteDetails["longitude"] as Double
+                    val addedByUserEmail = siteDetails["addedByUserEmail"] as String
+                    val markerId = siteDetails["markerId"] as String
+
+                    val isVisible = !visibleSiteIds.contains(markerId)
+
+                    if (isVisible) {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = title,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = sport,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = description,
+                                        fontSize = 14.sp,
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    if (rating > 1) {
+                                        Text(
+                                            text = "Valorada en $rating estrellas",
+                                            fontSize = 14.sp,
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "Valorada en $rating estrella",
+                                            fontSize = 14.sp,
+                                        )
+                                    }
+                                    Row {
+                                        repeat(rating.toInt()) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.baseline_star_24),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = "Ubicado en: $latitude, $longitude",
+                                        fontSize = 14.sp,
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = "Añadido por: $addedByUserEmail",
+                                        fontSize = 14.sp,
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Button(
+                                            onClick = {
+                                                acceptSite(markerId)
+                                                visibleSiteIds = visibleSiteIds + markerId
+                                            }
+                                        ) {
+                                            Text("Aceptar")
+                                        }
+                                        Spacer(modifier = Modifier.width(30.dp))
+                                        Button(
+                                            onClick = {
+                                                denySite(markerId)
+                                                visibleSiteIds = visibleSiteIds + markerId
+                                            }
+                                        ) {
+                                            Text("Denegar")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
+}
+
+suspend fun loadSitesToAccept(): List<Map<String, Any>> = withContext(Dispatchers.IO)  {
+    val firestore = FirebaseFirestore.getInstance()
+    val markers = mutableListOf<Map<String, Any>>()
+
+    try {
+        val result = firestore.collection("markers")
+            .whereEqualTo("accepted", false)
+            .get()
+            .await()
+
+        for (document in result) {
+            markers.add(document.data)
+        }
+    } catch (exception: Exception) {
+        Log.e("MasDeporte", "Error al obtener los marcadores", exception)
+    }
+    markers
+}
+
+private fun acceptSite(markerId: String) {
+    val firestore = FirebaseFirestore.getInstance()
+    val markersCollection = firestore.collection("markers")
+
+    markersCollection
+        .whereEqualTo("markerId", markerId)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                val documentId = documents.documents[0].id
+                markersCollection.document(documentId)
+                    .update("accepted", true)
+                    .addOnSuccessListener {
+                        Log.d("MasDeporte", "Marcador $markerId aceptado exitosamente.")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("MasDeporte", "Error al aceptar el marcador $markerId", e)
+                    }
+            } else {
+                Log.e("MasDeporte", "No se encontró el marcador con ID: $markerId")
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al obtener el documento de marcadores", e)
+        }
+}
+private fun denySite(markerId: String) {
+    val firestore = FirebaseFirestore.getInstance()
+    val markersCollection = firestore.collection("markers")
+
+    markersCollection
+        .whereEqualTo("markerId", markerId)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                val documentId = documents.documents[0].id
+                markersCollection.document(documentId)
+                    .delete()
+                    .addOnSuccessListener {
+                        Log.d("MasDeporte", "Marcador $markerId eliminado exitosamente.")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("MasDeporte", "Error al eliminar el marcador $markerId", e)
+                    }
+            } else {
+                Log.e("MasDeporte", "No se encontró el marcador con ID: $markerId")
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al obtener el documento de marcadores", e)
+        }
 }
 
 @Composable
