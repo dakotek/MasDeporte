@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -159,7 +161,8 @@ fun ProfileScreen(
                     Image(
                         painter = painterResource(id = R.drawable.baseline_person_pin_24),
                         contentDescription = null,
-                        modifier = Modifier.size(150.dp)
+                        modifier = Modifier
+                            .size(150.dp)
                             .padding(top = 25.dp)
                     )
                 }
@@ -201,6 +204,18 @@ fun ProfileScreen(
                         text = " $userType",
                         fontSize = 18.sp,
                     )
+                }
+            }
+            item {
+                Button(
+                    onClick = {
+                        navController.navigate("main")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.Black)
+                ) {
+                    Text("Cerrar Sesión")
                 }
             }
             item {
@@ -321,6 +336,7 @@ fun ProfileScreen(
         }
     }
 }
+
 suspend fun loadFavoriteSitesDetails(userEmail: String): List<Map<String, Any>>? {
     Log.d("ProfileScreen", "Iniciando carga de detalles de favoritos para el usuario: $userEmail")
     val firestore = FirebaseFirestore.getInstance()
