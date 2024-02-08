@@ -298,7 +298,7 @@ private fun showMarkerDetailsDialog(
     builder.show()
 }
 
-private fun isMarkerInFavorites(markerId: String, userEmail: String, callback: (Boolean) -> Unit) {
+fun isMarkerInFavorites(markerId: String, userEmail: String, callback: (Boolean) -> Unit) {
     val firestore = FirebaseFirestore.getInstance()
     val favoritesCollection = firestore.collection("favorites")
 
@@ -320,7 +320,7 @@ private fun isMarkerInFavorites(markerId: String, userEmail: String, callback: (
         }
 }
 
-private fun addMarkerToFavorites(markerId: String, userEmail: String) {
+fun addMarkerToFavorites(markerId: String, userEmail: String) {
     val firestore = FirebaseFirestore.getInstance()
     val favoritesCollection = firestore.collection("favorites")
 
@@ -344,7 +344,7 @@ private fun addMarkerToFavorites(markerId: String, userEmail: String) {
         }
 }
 
-private fun removeMarkerFromFavorites(markerId: String, userEmail: String) {
+fun removeMarkerFromFavorites(markerId: String, userEmail: String) {
     val firestore = FirebaseFirestore.getInstance()
     val favoritesCollection = firestore.collection("favorites")
 

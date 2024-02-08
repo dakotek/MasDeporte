@@ -71,6 +71,7 @@ fun ProfileScreen(
     var userUid by remember { mutableStateOf("") }
 
     var favoriteSitesDetails by remember { mutableStateOf<List<Map<String, Any>>?>(null) }
+    var visibleSiteIds by remember { mutableStateOf(emptySet<String>()) }
 
     LaunchedEffect(viewModel) {
         val user = viewModel.getUserFromDatabase()
@@ -233,8 +234,7 @@ fun ProfileScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
-            if (favoriteSitesDetails.isNullOrEmpty()) {
-                Log.d("ProfileScreen", "favoritesSitesDetails: $favoriteSitesDetails")
+            if (favoriteSitesDetails.isNullOrEmpty() || (favoriteSitesDetails?.size == visibleSiteIds.size)) {
                 item {
                     Text(
                         text = "NO HAY SITIOS GUARDADOS, VE AL MAPA PARA GUARDAR TUS SITIOS FAVORITOS",
@@ -248,85 +248,103 @@ fun ProfileScreen(
                     val sport = siteDetails["sport"] as String
                     val description = siteDetails["description"] as String
                     val rating = siteDetails["rating"] as Long
-                    Log.d("ProfileScreen", "Detalles del sitio favorito $siteDetails")
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                        ) {
-                            Column(
+                    val markerId = siteDetails["markerId"] as String
+
+                    val isVisible = !visibleSiteIds.contains(markerId)
+
+                    if (isVisible) {
+                        item {
+                            Card(
                                 modifier = Modifier
-                                    .padding(16.dp)
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
                             ) {
-                                Text(
-                                    text = title,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = sport,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = description,
-                                    fontSize = 14.sp,
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                if (rating > 1) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                ) {
                                     Text(
-                                        text = "Valorada en $rating estrellas",
+                                        text = title,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = sport,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = description,
                                         fontSize = 14.sp,
                                     )
-                                } else {
-                                    Text(
-                                        text = "Valorada en $rating estrella",
-                                        fontSize = 14.sp,
-                                    )
-                                }
-                                Row {
-                                    repeat(rating.toInt()) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.baseline_star_24),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp)
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    if (rating > 1) {
+                                        Text(
+                                            text = "Valorada en $rating estrellas",
+                                            fontSize = 14.sp,
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "Valorada en $rating estrella",
+                                            fontSize = 14.sp,
                                         )
                                     }
-                                }
-                                Spacer(modifier = Modifier.height(10.dp))
-
-                                val iconSport = when (sport) {
-                                    "Fútbol" -> R.drawable.futbolmarker
-                                    "Baloncesto" -> R.drawable.baloncestomarker
-                                    "Escalada" -> R.drawable.escaladamarker
-                                    "Parkour" -> R.drawable.parkourmarker
-                                    "Skate" -> R.drawable.skatemarker
-                                    "Bici" -> R.drawable.bicimarker
-                                    "Fronton" -> R.drawable.frontonmarker
-                                    "Tenis" -> R.drawable.tenismarker
-                                    "Otro" -> R.drawable.otromarker
-                                    else -> R.drawable.otromarker
-                                }
-
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    OutlinedButton(
-                                        onClick = { navController.navigate("map") }
-                                    ) {
-                                        Text("Ver en el mapa")
+                                    Row {
+                                        repeat(rating.toInt()) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.baseline_star_24),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
                                     }
-                                    Spacer(modifier = Modifier.width(30.dp))
-                                    Image(
-                                        painter = painterResource(id = iconSport),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(60.dp)
-                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    val iconSport = when (sport) {
+                                        "Fútbol" -> R.drawable.futbolmarker
+                                        "Baloncesto" -> R.drawable.baloncestomarker
+                                        "Escalada" -> R.drawable.escaladamarker
+                                        "Parkour" -> R.drawable.parkourmarker
+                                        "Skate" -> R.drawable.skatemarker
+                                        "Bici" -> R.drawable.bicimarker
+                                        "Fronton" -> R.drawable.frontonmarker
+                                        "Tenis" -> R.drawable.tenismarker
+                                        "Otro" -> R.drawable.otromarker
+                                        else -> R.drawable.otromarker
+                                    }
+
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        OutlinedButton(
+                                            onClick = { navController.navigate("map") }
+                                        ) {
+                                            Text("Ver en el mapa")
+                                        }
+                                        Spacer(modifier = Modifier.width(30.dp))
+                                        Image(
+                                            painter = painterResource(id = iconSport),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(60.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(30.dp))
+                                        IconButton(
+                                            onClick = {
+                                                removeMarkerFromFavorites(markerId, userEmail)
+                                                visibleSiteIds = visibleSiteIds + markerId
+                                            }
+                                        ) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.baseline_favorite_24),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(60.dp)
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -372,6 +390,8 @@ suspend fun loadFavoriteSitesDetails(userEmail: String): List<Map<String, Any>>?
         null
     }
 }
+
+
 
 @Composable
 @Preview(showBackground = true)
