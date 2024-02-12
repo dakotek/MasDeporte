@@ -14,6 +14,11 @@ data class User(
     val name: String,
     val userType: String
 ) {
+    /**
+     * Convierte el objeto User a un mapa mutable para su almacenamiento en Firestore.
+     *
+     * @return Mapa mutable que representa el objeto User.
+     */
     fun toMap(): MutableMap<String, Any>{
         return mutableMapOf(
             "user_id" to this.userId,
