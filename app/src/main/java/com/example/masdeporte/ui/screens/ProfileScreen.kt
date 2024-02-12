@@ -72,8 +72,9 @@ fun ProfileScreen(
 ) {
     var context = LocalContext.current
 
+    // Estado para controlar la visibilidad del menú desplegable
     var showMenu by remember { mutableStateOf(false) }
-
+    // Variables para almacenar la información del usuario
     var userName by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf("") }
@@ -82,6 +83,7 @@ fun ProfileScreen(
     var favoriteSitesDetails by remember { mutableStateOf<List<Map<String, Any>>?>(null) }
     var visibleSiteIds by remember { mutableStateOf(emptySet<String>()) }
 
+    // Obtener la información del usuario al cargar la pantalla
     LaunchedEffect(viewModel) {
         val user = viewModel.getUserFromDatabase()
         user?.let {
@@ -94,6 +96,7 @@ fun ProfileScreen(
         favoriteSitesDetails = loadFavoriteSitesDetails(userEmail)
     }
 
+    // Diseño de la pantalla
     Scaffold(
         topBar = {
             TopAppBar(
@@ -127,6 +130,7 @@ fun ProfileScreen(
                             },
                             contentPadding = PaddingValues(8.dp),
                         )
+                        // Mostrar opción adicional para usuarios de tipo "ADMIN"
                         if (userType == "ADMIN") {
                             DropdownMenuItem(
                                 text = { Text("Confirmar sitios (ADMIN)") },
@@ -161,6 +165,7 @@ fun ProfileScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Avatar del usuario
             item {
                 Box(
                     modifier = Modifier
@@ -177,6 +182,7 @@ fun ProfileScreen(
                     )
                 }
             }
+            // Nombre del usuario
             item {
                 Row {
                     Text(
@@ -190,6 +196,7 @@ fun ProfileScreen(
                     )
                 }
             }
+            // Correo electrónico del usuario
             item {
                 Row {
                     Text(
@@ -203,6 +210,7 @@ fun ProfileScreen(
                     )
                 }
             }
+            // Tipo de usuario
             item {
                 Row {
                     Text(
@@ -216,6 +224,7 @@ fun ProfileScreen(
                     )
                 }
             }
+            // Botón para cerrar sesión
             item {
                 Button(
                     onClick = {
@@ -236,6 +245,7 @@ fun ProfileScreen(
                     color = Color.Gray,
                 )
             }
+            // Título de "Mis Sitios Favoritos"
             item {
                 Text(
                     text = "Mis Sitios Favoritos",
@@ -243,7 +253,9 @@ fun ProfileScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
+            // Lista de sitios favoritos
             if (favoriteSitesDetails.isNullOrEmpty() || (favoriteSitesDetails?.size == visibleSiteIds.size)) {
+                // Mensaje si no hay sitios favoritos
                 item {
                     Text(
                         text = "NO HAY SITIOS GUARDADOS, VE AL MAPA PARA GUARDAR TUS SITIOS FAVORITOS",
@@ -252,6 +264,7 @@ fun ProfileScreen(
                     )
                 }
             } else {
+                // Mostrar detalles de sitios favoritos
                 favoriteSitesDetails?.forEach { siteDetails ->
                     val title = siteDetails["title"] as String
                     val sport = siteDetails["sport"] as String
@@ -370,6 +383,7 @@ fun ProfileScreen(
     }
 }
 
+// Función para cargar los detalles de los sitios favoritos desde Firestore
 suspend fun loadFavoriteSitesDetails(userEmail: String): List<Map<String, Any>>? {
     Log.d("ProfileScreen", "Iniciando carga de detalles de favoritos para el usuario: $userEmail")
     val firestore = FirebaseFirestore.getInstance()
@@ -405,6 +419,8 @@ suspend fun loadFavoriteSitesDetails(userEmail: String): List<Map<String, Any>>?
         null
     }
 }
+
+// Función para mostrar el diálogo de reseñas
 private fun showReviewsDialogProfile(context: Context, title: String, markerId: String, userEmail: String) {
     val builder = AlertDialog.Builder(context)
     builder.setTitle("Reseñas de $title")
@@ -462,6 +478,7 @@ private fun showReviewsDialogProfile(context: Context, title: String, markerId: 
     builder.show()
 }
 
+// Función para agregar una reseña a la base de datos
 private fun addReviewToDatabase(markerId: String, reviewText: String, userEmail: String) {
     val firestore = FirebaseFirestore.getInstance()
     val reviewsCollection = firestore.collection("reviews")

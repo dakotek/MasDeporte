@@ -30,18 +30,19 @@ import com.example.masdeporte.R
 @Composable
 fun MainScreen(navController: NavController) {
     val logoVisible = remember { mutableStateOf(true) }
-    // Mostrar el logo durante 3 segundos
+    // Si el logo es visible, mostrar la pantalla de logo durante 3 segundos
     if (logoVisible.value) {
         LogoScreen()
         Handler(Looper.getMainLooper()).postDelayed({
             logoVisible.value = false
         }, 3000)
     } else {
-        // Mostrar los botones de inicio de sesión y registro
+        // Si el logo ya no es visible, mostrar los botones de inicio de sesión y registro
         ButtonsScreen(navController)
     }
 }
 
+// Pantalla de solo logo
 @Composable
 fun LogoScreen() {
     Column(
@@ -60,6 +61,7 @@ fun LogoScreen() {
     }
 }
 
+// Pantalla con botones de inicio de sesión y registro
 @Composable
 fun ButtonsScreen(navController: NavController) {
     Column(

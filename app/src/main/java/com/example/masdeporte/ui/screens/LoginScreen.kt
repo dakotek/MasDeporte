@@ -46,14 +46,18 @@ fun LoginScreen(
     navController: NavController,
     viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    // Estado para el correo electrónico y la contraseña
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // Estado para el Snackbar
     val snackState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    fun launchSnackbar(message: String, actionLabel: String?=null,duration: SnackbarDuration = SnackbarDuration.Short) {
+
+    // Función para mostrar el Snackbar
+    fun launchSnackbar(message: String, actionLabel: String? = null, duration: SnackbarDuration = SnackbarDuration.Short) {
         scope.launch {
-            snackState.showSnackbar(message = message,actionLabel=actionLabel, duration=duration)
+            snackState.showSnackbar(message = message, actionLabel = actionLabel, duration = duration)
         }
     }
 
@@ -64,6 +68,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Imagen del logo
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = null,
@@ -73,6 +78,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Título de la pantalla de inicio de sesión
         Text(
             text = stringResource(R.string.login2),
             fontSize = 35.sp,
@@ -82,6 +88,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de texto para el correo electrónico
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -94,6 +101,7 @@ fun LoginScreen(
                 .padding(8.dp)
         )
 
+        // Campo de texto para la contraseña
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -145,6 +153,8 @@ fun LoginScreen(
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
+
+        // Enlace para ir a la pantalla de registro
         Text(
             text = stringResource(R.string.signUpText),
             fontSize = 25.sp,
@@ -161,6 +171,7 @@ fun LoginScreen(
             }
         )
 
+        // Snackbar
         Box(modifier = Modifier.fillMaxSize(), Alignment.BottomCenter){
             SnackbarHost(hostState = snackState) {
                 Snackbar(

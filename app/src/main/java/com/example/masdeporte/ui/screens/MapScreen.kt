@@ -44,13 +44,15 @@ fun MapScreen(
     navController: NavController,
     viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    // Estado para controlar la visibilidad del menú desplegable
     var showMenu by remember { mutableStateOf(false) }
-
+    // Variables para almacenar la información del usuario
     var userName by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf("") }
     var userUid by remember { mutableStateOf("") }
 
+    // Obtener la información del usuario al cargar la pantalla
     LaunchedEffect(viewModel) {
         val user = viewModel.getUserFromDatabase()
         user?.let {
@@ -62,6 +64,7 @@ fun MapScreen(
         }
     }
 
+    // Diseño de la pantalla
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,6 +77,7 @@ fun MapScreen(
                     IconButton(onClick = { showMenu = !showMenu }) {
                         Icon(imageVector = Icons.Default.Menu, contentDescription = null)
                     }
+                    // Menú desplegable con opciones de navegación
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }) {
@@ -95,6 +99,7 @@ fun MapScreen(
                             },
                             contentPadding = PaddingValues(8.dp),
                         )
+                        // Mostrar opción adicional para usuarios de tipo "ADMIN"
                         if (userType == "ADMIN") {
                             DropdownMenuItem(
                                 text = { Text("Confirmar sitios (ADMIN)") },
@@ -130,6 +135,7 @@ fun MapScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val coroutineScope = rememberCoroutineScope()
+            // Creacion del mapa
             MyGoogleMaps(LocalContext.current, userEmail, coroutineScope)
         }
     }

@@ -55,6 +55,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+/**
+ * Pantalla de "Aceptar sitios (ADMIN)" para que los administradores confirmen o rechacen los sitios propuestos por los usuarios.
+ * @param navController Controlador de navegación.
+ * @param viewModel ViewModel para el inicio de sesión y registro.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,15 +67,20 @@ fun AcceptSitesAdminScreen(
     navController: NavController,
     viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    // Estado para controlar la visibilidad del menú desplegable
     var showMenu by remember { mutableStateOf(false) }
+    // Variables para almacenar la información del usuario
     var userName by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf("") }
     var userUid by remember { mutableStateOf("") }
 
+    // Lista de sitios para aceptar
     var sitesToAccept by remember { mutableStateOf<List<Map<String, Any>>?>(null) }
+    // Conjunto de IDs de sitios visibles
     var visibleSiteIds by remember { mutableStateOf(emptySet<String>()) }
 
+    // Obtener la información del usuario al cargar la pantalla
     LaunchedEffect(viewModel) {
         val user = viewModel.getUserFromDatabase()
         user?.let {
@@ -83,6 +93,7 @@ fun AcceptSitesAdminScreen(
         sitesToAccept = loadSitesToAccept()
     }
 
+    // Diseño de la pantalla
     Scaffold(
         topBar = {
             TopAppBar(
@@ -95,6 +106,7 @@ fun AcceptSitesAdminScreen(
                     IconButton(onClick = { showMenu = !showMenu }) {
                         Icon(imageVector = Icons.Default.Menu, contentDescription = null)
                     }
+                    // Menú desplegable con opciones de navegación
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }) {
@@ -116,6 +128,7 @@ fun AcceptSitesAdminScreen(
                             },
                             contentPadding = PaddingValues(8.dp),
                         )
+                        // Mostrar opción adicional para usuarios de tipo "ADMIN"
                         if (userType == "ADMIN") {
                             DropdownMenuItem(
                                 text = { Text("Confirmar sitios (ADMIN)") },
@@ -143,6 +156,7 @@ fun AcceptSitesAdminScreen(
             )
         }
     ) {
+        // Lista de sitios para aceptar
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -159,6 +173,7 @@ fun AcceptSitesAdminScreen(
                 )
             }
             if (sitesToAccept.isNullOrEmpty() || (sitesToAccept?.size == visibleSiteIds.size)) {
+                // Mostrar mensaje si no hay sitios para revisar
                 item {
                     Text(
                         text = "NO HAY SITIOS PARA REVISAR Y ACEPTAR. CUANDO ALGUIEN AÑADA MÁS SITIOS SE MOSTRARÁN AQUI",
@@ -180,6 +195,7 @@ fun AcceptSitesAdminScreen(
                     val isVisible = !visibleSiteIds.contains(markerId)
 
                     if (isVisible) {
+                        // Mostrar cada sitio en una tarjeta
                         item {
                             Card(
                                 modifier = Modifier
@@ -276,6 +292,9 @@ fun AcceptSitesAdminScreen(
     }
 }
 
+/**
+ * Función suspendida para cargar los sitios que necesitan ser aceptados por los administradores.
+ */
 suspend fun loadSitesToAccept(): List<Map<String, Any>> = withContext(Dispatchers.IO)  {
     val firestore = FirebaseFirestore.getInstance()
     val markers = mutableListOf<Map<String, Any>>()
@@ -295,6 +314,10 @@ suspend fun loadSitesToAccept(): List<Map<String, Any>> = withContext(Dispatcher
     markers
 }
 
+/**
+ * Función para aceptar un sitio propuesto por un usuario.
+ * @param markerId ID del marcador a aceptar.
+ */
 private fun acceptSite(markerId: String) {
     val firestore = FirebaseFirestore.getInstance()
     val markersCollection = firestore.collection("markers")
@@ -321,6 +344,11 @@ private fun acceptSite(markerId: String) {
             Log.e("MasDeporte", "Error al obtener el documento de marcadores", e)
         }
 }
+
+/**
+ * Función para denegar un sitio propuesto por un usuario.
+ * @param markerId ID del marcador a denegar.
+ */
 private fun denySite(markerId: String) {
     val firestore = FirebaseFirestore.getInstance()
     val markersCollection = firestore.collection("markers")

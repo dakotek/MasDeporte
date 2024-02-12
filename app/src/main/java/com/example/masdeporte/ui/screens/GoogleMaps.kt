@@ -50,15 +50,21 @@ import java.util.UUID
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope) {
+    // Lista mutable de marcadores
     var markers by remember { mutableStateOf(emptyList<Map<String, Any>>()) }
+    // Estado para la posición de la cámara
     val cameraPositionState = rememberCameraPositionState {}
+    // Ubicación por defecto (Madrid)
     val currentLocation = LatLng(40.4168, -3.7038)
+    // Establecer la posición inicial de la cámara
     cameraPositionState.position = CameraPosition(currentLocation, 8f, 0f, 0f)
 
     coroutineScope.launch {
+        // Cargar los marcadores aceptados de la base de datos
         markers = loadMarkersFromDatabase().filter { it["accepted"] == true }
     }
 
+    // Componente de mapa de Google
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         onMapClick = { latLng ->
@@ -66,6 +72,7 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
         },
         cameraPositionState = cameraPositionState,
     ) {
+        // Recorrer y mostrar los marcadores en el mapa
         markers.forEach { markerData ->
             val position = LatLng(markerData["latitude"] as Double, markerData["longitude"] as Double)
             val title = markerData["title"] as String
@@ -75,6 +82,7 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
             val addedByUserEmail =  markerData["addedByUserEmail"] as String
             val markerId = markerData["markerId"] as String
 
+            // Determinar el icono según el deporte
             val iconSport = when (sport) {
                 "Fútbol" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.futbolmarker)
                 "Baloncesto" -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.baloncestomarker)
@@ -88,6 +96,7 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
                 else -> BitmapDescriptorFactory.fromResource(com.example.masdeporte.R.drawable.otromarker)
             }
 
+            // Agregar marcador al mapa
             Marker(
                 position = position,
                 icon = iconSport,
@@ -100,6 +109,12 @@ fun MyGoogleMaps(context: Context, email: String, coroutineScope: CoroutineScope
     }
 }
 
+/**
+ * Muestra un diálogo para agregar un nuevo marcador en el mapa.
+ * @param context El contexto de la actividad o fragmento.
+ * @param latLng La posición donde se ha hecho clic en el mapa.
+ * @param email El correo electrónico del usuario actual.
+ */
 private fun showDialogMakeMarker(context: Context, latLng: LatLng, email: String) {
     val builder = AlertDialog.Builder(context)
     builder.setTitle("Agregar Marcador")
@@ -107,11 +122,13 @@ private fun showDialogMakeMarker(context: Context, latLng: LatLng, email: String
     val layout = LinearLayout(context)
     layout.orientation = LinearLayout.VERTICAL
 
+    // Campo de entrada para el título del marcador
     val titleEditText = EditText(context)
     titleEditText.hint = "Título"
     layout.addView(titleEditText)
     addMarginBottomAndTop(titleEditText)
 
+    // Spinner para seleccionar el deporte del marcador
     val chooseSportText = TextView(context)
     chooseSportText.text = "Elegir Deporte"
     layout.addView(chooseSportText)
@@ -123,11 +140,13 @@ private fun showDialogMakeMarker(context: Context, latLng: LatLng, email: String
     layout.addView(sportSpinner)
     addMarginBottom(sportSpinner)
 
+    // Campo de entrada para la descripción del marcador
     val descriptionEditText = EditText(context)
     descriptionEditText.hint = "Descripción"
     layout.addView(descriptionEditText)
     addMarginBottom(descriptionEditText)
 
+    // Spinner para seleccionar la valoración del marcador
     val chooseRating = TextView(context)
     chooseRating.text = "Valoración"
     layout.addView(chooseRating)
@@ -142,11 +161,13 @@ private fun showDialogMakeMarker(context: Context, latLng: LatLng, email: String
     builder.setView(layout)
 
     builder.setPositiveButton("Guardar") { _, _ ->
+        // Obtener los valores ingresados por el usuario
         val title = titleEditText.text.toString()
         val sport = sports[sportSpinner.selectedItemPosition]
         val description = descriptionEditText.text.toString()
         val rating = ratingArray[ratingSpinner.selectedItemPosition]
 
+        // Agregar el marcador a la base de datos
         addMarkerToDatabase(latLng, title, sport, description, rating, email)
     }
 
@@ -157,6 +178,17 @@ private fun showDialogMakeMarker(context: Context, latLng: LatLng, email: String
     builder.show()
 }
 
+/**
+ * Muestra un diálogo con los detalles de un marcador en el mapa.
+ * @param context El contexto de la actividad o fragmento.
+ * @param title El título del marcador.
+ * @param sport El deporte asociado al marcador.
+ * @param description La descripción del marcador.
+ * @param rating La valoración del marcador.
+ * @param addedByUserEmail El correo electrónico del usuario que agregó el marcador.
+ * @param markerId El ID del marcador.
+ * @param userEmail El correo electrónico del usuario actual.
+ */
 private fun showMarkerDetailsDialog(
     context: Context,
     title: String,
@@ -177,6 +209,7 @@ private fun showMarkerDetailsDialog(
         LinearLayout.LayoutParams.MATCH_PARENT
     )
 
+    // TextView para mostrar el título del marcador
     val titleTextView = TextView(context)
     titleTextView.text = title
     titleTextView.gravity = Gravity.CENTER
@@ -185,6 +218,7 @@ private fun showMarkerDetailsDialog(
     addMarginBottomAndTop(titleTextView)
     layout.addView(titleTextView)
 
+    // TextView para mostrar el deporte del marcador
     val sportTextView = TextView(context)
     sportTextView.text = sport
     sportTextView.gravity = Gravity.CENTER
@@ -192,6 +226,7 @@ private fun showMarkerDetailsDialog(
     addMarginBottom(sportTextView)
     layout.addView(sportTextView)
 
+    // TextView para mostrar la descripción del marcador
     val descriptionTextView = TextView(context)
     descriptionTextView.text = description
     descriptionTextView.gravity = Gravity.CENTER
@@ -199,6 +234,7 @@ private fun showMarkerDetailsDialog(
     addMarginBottom(descriptionTextView)
     layout.addView(descriptionTextView)
 
+    // TextView para mostrar la valoración del marcador
     val ratingTextView = TextView(context)
     if (rating > 1) {
         ratingTextView.text = "Valorada en $rating estrellas"
@@ -209,7 +245,7 @@ private fun showMarkerDetailsDialog(
     ratingTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
     layout.addView(ratingTextView)
 
-    // Crear un LinearLayout horizontal para las estrellas
+    // Crear un LinearLayout horizontal para mostrar las estrellas de la valoración
     val starsLayout = LinearLayout(context)
     starsLayout.orientation = LinearLayout.HORIZONTAL
     starsLayout.gravity = Gravity.CENTER
@@ -230,6 +266,7 @@ private fun showMarkerDetailsDialog(
     }
     layout.addView(starsLayout)
 
+    // TextView para mostrar el usuario que agregó el marcador
     val addedByUserEmailTextView = TextView(context)
     addedByUserEmailTextView.text = "Añadido por: $addedByUserEmail"
     addedByUserEmailTextView.gravity = Gravity.CENTER
@@ -237,6 +274,7 @@ private fun showMarkerDetailsDialog(
     addMarginBottom(addedByUserEmailTextView)
     layout.addView(addedByUserEmailTextView)
 
+    // ImageView para agregar o eliminar de favoritos
     val favoritesButton = ImageView(context)
     var isFavorite = false
 
@@ -251,6 +289,7 @@ private fun showMarkerDetailsDialog(
         layout.addView(favoritesButton)
         addMarginBottom(favoritesButton)
 
+        // Cambiar el estado de favoritos al hacer clic
         favoritesButton.setOnClickListener {
             if (isFavorite) {
                 removeMarkerFromFavorites(markerId, userEmail)
@@ -264,6 +303,7 @@ private fun showMarkerDetailsDialog(
         }
     }
 
+    // Botón para ver reseñas
     val viewReviewsButton = Button(context)
     viewReviewsButton.text = "Ver reseñas"
     viewReviewsButton.setOnClickListener {
@@ -303,6 +343,12 @@ private fun showMarkerDetailsDialog(
     builder.show()
 }
 
+/**
+ * Verifica si un marcador está en favoritos para un usuario dado.
+ * @param markerId El ID del marcador.
+ * @param userEmail El correo electrónico del usuario.
+ * @param callback Una función de retorno de llamada que se invocará con el resultado.
+ */
 fun isMarkerInFavorites(markerId: String, userEmail: String, callback: (Boolean) -> Unit) {
     val firestore = FirebaseFirestore.getInstance()
     val favoritesCollection = firestore.collection("favorites")
@@ -325,6 +371,11 @@ fun isMarkerInFavorites(markerId: String, userEmail: String, callback: (Boolean)
         }
 }
 
+/**
+ * Agrega un marcador a la lista de favoritos de un usuario.
+ * @param markerId El ID del marcador.
+ * @param userEmail El correo electrónico del usuario.
+ */
 fun addMarkerToFavorites(markerId: String, userEmail: String) {
     val firestore = FirebaseFirestore.getInstance()
     val favoritesCollection = firestore.collection("favorites")
@@ -349,6 +400,11 @@ fun addMarkerToFavorites(markerId: String, userEmail: String) {
         }
 }
 
+/**
+ * Elimina un marcador de la lista de favoritos de un usuario.
+ * @param markerId El ID del marcador.
+ * @param userEmail El correo electrónico del usuario.
+ */
 fun removeMarkerFromFavorites(markerId: String, userEmail: String) {
     val firestore = FirebaseFirestore.getInstance()
     val favoritesCollection = firestore.collection("favorites")
@@ -373,6 +429,10 @@ fun removeMarkerFromFavorites(markerId: String, userEmail: String) {
         }
 }
 
+/**
+ * Agrega márgenes en la parte inferior para la vista dada.
+ * @param view La vista a la que se agregarán los márgenes.
+ */
 fun addMarginBottom(view: View) {
     val layoutParams = LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -381,6 +441,10 @@ fun addMarginBottom(view: View) {
     layoutParams.setMargins(0, 0, 0, 50)
     view.layoutParams = layoutParams
 }
+/**
+ * Agrega márgenes en la parte superior e inferior para la vista dada.
+ * @param view La vista a la que se agregarán los márgenes.
+ */
 fun addMarginBottomAndTop(view: View) {
     val layoutParams = LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -390,6 +454,15 @@ fun addMarginBottomAndTop(view: View) {
     view.layoutParams = layoutParams
 }
 
+/**
+ * Agrega un marcador a la base de datos Firestore.
+ * @param latLng La posición del marcador.
+ * @param title El título del marcador.
+ * @param sport El deporte asociado al marcador.
+ * @param description La descripción del marcador.
+ * @param rating La valoración del marcador.
+ * @param addedByUserEmail El correo electrónico del usuario que agregó el marcador.
+ */
 private fun addMarkerToDatabase(latLng: LatLng, title: String, sport: String, description: String, rating: Int, addedByUserEmail: String) {
     val firestore = FirebaseFirestore.getInstance()
 
@@ -415,6 +488,10 @@ private fun addMarkerToDatabase(latLng: LatLng, title: String, sport: String, de
         }
 }
 
+/**
+ * Carga los marcadores desde la base de datos Firestore.
+ * @return Una lista de mapas que representan los marcadores.
+ */
 suspend fun loadMarkersFromDatabase(): List<Map<String, Any>> = withContext(Dispatchers.IO) {
     val firestore = FirebaseFirestore.getInstance()
     val markers = mutableListOf<Map<String, Any>>()
@@ -432,6 +509,13 @@ suspend fun loadMarkersFromDatabase(): List<Map<String, Any>> = withContext(Disp
     markers
 }
 
+/**
+ * Muestra un diálogo para ver y agregar reseñas a un marcador.
+ * @param context El contexto de la actividad o fragmento.
+ * @param title El título del marcador.
+ * @param markerId El ID del marcador.
+ * @param userEmail El correo electrónico del usuario actual.
+ */
 private fun showReviewsDialog(context: Context, title: String, markerId: String, userEmail: String) {
     val builder = AlertDialog.Builder(context)
     builder.setTitle("Reseñas de $title")
@@ -442,16 +526,19 @@ private fun showReviewsDialog(context: Context, title: String, markerId: String,
     val firestore = FirebaseFirestore.getInstance()
     val reviewsCollection = firestore.collection("reviews")
 
+    // Obtener reseñas del marcado
     reviewsCollection
         .whereEqualTo("markerId", markerId)
         .get()
         .addOnSuccessListener { documents ->
             if (documents.isEmpty) {
+                // Si no hay reseñas, mostrar un mensaje indicándolo
                 val noReviewsTextView = TextView(context)
                 noReviewsTextView.text = "No hay reseñas todavía."
                 noReviewsTextView.gravity = Gravity.CENTER
                 layout.addView(noReviewsTextView)
             } else {
+                // Si no hay reseñas, mostrar un mensaje indicándolo
                 for (document in documents) {
                     val reviewText = document.getString("review")
                     val reviewUserEmail = document.getString("userEmail")
@@ -467,6 +554,7 @@ private fun showReviewsDialog(context: Context, title: String, markerId: String,
             Log.e("MasDeporte", "Error al obtener las reseñas", e)
         }
 
+    // EditText para agregar una nueva reseña
     val newReviewEditText = EditText(context)
     newReviewEditText.hint = "Escribe tu reseña aquí"
     layout.addView(newReviewEditText)
@@ -489,6 +577,12 @@ private fun showReviewsDialog(context: Context, title: String, markerId: String,
     builder.show()
 }
 
+/**
+ * Agrega una reseña a la base de datos Firestore.
+ * @param markerId El ID del marcador al que se agregará la reseña.
+ * @param reviewText El texto de la reseña.
+ * @param userEmail El correo electrónico del usuario que agrega la reseña.
+ */
 private fun addReviewToDatabase(markerId: String, reviewText: String, userEmail: String) {
     val firestore = FirebaseFirestore.getInstance()
     val reviewsCollection = firestore.collection("reviews")
@@ -508,5 +602,3 @@ private fun addReviewToDatabase(markerId: String, reviewText: String, userEmail:
             Log.e("MasDeporte", "Error al agregar reseña", e)
         }
 }
-
-

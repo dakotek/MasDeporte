@@ -43,6 +43,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.masdeporte.R
 import com.example.masdeporte.ui.theme.MasDeporteTheme
 
+/**
+ * Pantalla de "Acerca de la aplicación".
+ * @param navController Controlador de navegación.
+ * @param viewModel ViewModel para el inicio de sesión y registro.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,12 +55,15 @@ fun AboutAppScreen(
     navController: NavController,
     viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    // Estado para controlar la visibilidad del menú desplegable
     var showMenu by remember { mutableStateOf(false) }
+    // Variables para almacenar la información del usuario
     var userName by remember { mutableStateOf("") }
     var userEmail by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf("") }
     var userUid by remember { mutableStateOf("") }
 
+    // Obtener la información del usuario al cargar la pantalla
     LaunchedEffect(viewModel) {
         val user = viewModel.getUserFromDatabase()
         user?.let {
@@ -67,6 +75,7 @@ fun AboutAppScreen(
         }
     }
 
+    // Diseño de la pantalla
     Scaffold(
         topBar = {
             TopAppBar(
@@ -79,6 +88,7 @@ fun AboutAppScreen(
                     IconButton(onClick = { showMenu = !showMenu }) {
                         Icon(imageVector = Icons.Default.Menu, contentDescription = null)
                     }
+                    // Menú desplegable con opciones de navegación
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }) {
@@ -100,6 +110,7 @@ fun AboutAppScreen(
                             },
                             contentPadding = PaddingValues(8.dp),
                         )
+                        // Mostrar opción adicional para usuarios de tipo "ADMIN"
                         if (userType == "ADMIN") {
                             DropdownMenuItem(
                                 text = { Text("Confirmar sitios (ADMIN)") },
@@ -127,6 +138,7 @@ fun AboutAppScreen(
             )
         }
     ) {
+        // Contenido principal de la pantalla
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -134,6 +146,7 @@ fun AboutAppScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Logo de la aplicación
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = null,
@@ -144,6 +157,7 @@ fun AboutAppScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Nombre de la aplicación
             Text(
                 text = stringResource(R.string.app_name),
                 fontSize = 35.sp,
@@ -153,6 +167,7 @@ fun AboutAppScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Descripción de la aplicación
             Text(
                 text = stringResource(R.string.descripcion),
                 fontSize = 20.sp,
@@ -160,6 +175,7 @@ fun AboutAppScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Información sobre los desarrolladores
             Text(
                 text = stringResource(R.string.desarrolladores),
                 fontSize = 18.sp,
@@ -169,6 +185,7 @@ fun AboutAppScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Derechos de autor
             Text(
                 text = stringResource(R.string.copyright),
                 fontSize = 14.sp,
