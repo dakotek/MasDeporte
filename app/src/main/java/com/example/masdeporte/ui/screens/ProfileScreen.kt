@@ -1,7 +1,13 @@
 package com.example.masdeporte.ui.screens
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Context
 import android.util.Log
+import android.view.Gravity
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -63,6 +70,8 @@ fun ProfileScreen(
     navController: NavController,
     viewModel: LoginSignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    var context = LocalContext.current
+
     var showMenu by remember { mutableStateOf(false) }
 
     var userName by remember { mutableStateOf("") }
@@ -302,6 +311,12 @@ fun ProfileScreen(
                                     }
                                     Spacer(modifier = Modifier.height(10.dp))
 
+                                    OutlinedButton(onClick = { showReviewsDialogProfile(context, title, markerId, userEmail) }) {
+                                        Text(text = "Ver reseñas")
+                                    }
+                                    
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    
                                     val iconSport = when (sport) {
                                         "Fútbol" -> R.drawable.futbolmarker
                                         "Baloncesto" -> R.drawable.baloncestomarker
@@ -389,6 +404,82 @@ suspend fun loadFavoriteSitesDetails(userEmail: String): List<Map<String, Any>>?
         Log.e("ProfileScreen", "Error al cargar los detalles de los sitios favoritos del usuario", e)
         null
     }
+}
+private fun showReviewsDialogProfile(context: Context, title: String, markerId: String, userEmail: String) {
+    val builder = AlertDialog.Builder(context)
+    builder.setTitle("Reseñas de $title")
+
+    val layout = LinearLayout(context)
+    layout.orientation = LinearLayout.VERTICAL
+
+    val firestore = FirebaseFirestore.getInstance()
+    val reviewsCollection = firestore.collection("reviews")
+
+    reviewsCollection
+        .whereEqualTo("markerId", markerId)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (documents.isEmpty) {
+                val noReviewsTextView = TextView(context)
+                noReviewsTextView.text = "No hay reseñas todavía."
+                noReviewsTextView.gravity = Gravity.CENTER
+                layout.addView(noReviewsTextView)
+            } else {
+                for (document in documents) {
+                    val reviewText = document.getString("review")
+                    val reviewUserEmail = document.getString("userEmail")
+
+                    val reviewTextView = TextView(context)
+                    reviewTextView.text = "($reviewUserEmail) - $reviewText"
+                    addMarginBottom(reviewTextView)
+                    layout.addView(reviewTextView)
+                }
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al obtener las reseñas", e)
+        }
+
+    val newReviewEditText = EditText(context)
+    newReviewEditText.hint = "Escribe tu reseña aquí"
+    layout.addView(newReviewEditText)
+    addMarginBottomAndTop(newReviewEditText)
+
+    builder.setView(layout)
+
+    builder.setPositiveButton("Agregar reseña") { _, _ ->
+        val markerId = markerId
+        val review = newReviewEditText.text.toString()
+        val userEmail = userEmail
+
+        addReviewToDatabase(markerId, review, userEmail)
+    }
+
+    builder.setNegativeButton("Cancelar") { dialog, _ ->
+        dialog.cancel()
+    }
+
+    builder.show()
+}
+
+private fun addReviewToDatabase(markerId: String, reviewText: String, userEmail: String) {
+    val firestore = FirebaseFirestore.getInstance()
+    val reviewsCollection = firestore.collection("reviews")
+
+    val reviewData = hashMapOf(
+        "markerId" to markerId,
+        "review" to reviewText,
+        "userEmail" to userEmail
+    )
+
+    reviewsCollection
+        .add(reviewData)
+        .addOnSuccessListener { documentReference ->
+            Log.d("MasDeporte", "Reseña agregada con ID: ${documentReference.id}")
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al agregar reseña", e)
+        }
 }
 
 

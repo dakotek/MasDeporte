@@ -15,6 +15,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -237,11 +238,10 @@ private fun showMarkerDetailsDialog(
     layout.addView(addedByUserEmailTextView)
 
     val favoritesButton = ImageView(context)
-    var isFavorite = false // Variable de estado para rastrear si el marcador está en favoritos
+    var isFavorite = false
 
-    // Verificar si el marcador está en favoritos de forma asíncrona
     isMarkerInFavorites(markerId, userEmail) { result ->
-        isFavorite = result // Actualizar la variable de estado
+        isFavorite = result
         if (isFavorite) {
             favoritesButton.setImageResource(com.example.masdeporte.R.drawable.baseline_favorite_24)
         } else {
@@ -251,32 +251,37 @@ private fun showMarkerDetailsDialog(
         layout.addView(favoritesButton)
         addMarginBottom(favoritesButton)
 
-        // Manejar clic en el botón de favoritos
         favoritesButton.setOnClickListener {
             if (isFavorite) {
                 removeMarkerFromFavorites(markerId, userEmail)
                 favoritesButton.setImageResource(com.example.masdeporte.R.drawable.baseline_favorite_border_24)
-                isFavorite = false // Actualizar la variable de estado
+                isFavorite = false
             } else {
                 addMarkerToFavorites(markerId, userEmail)
                 favoritesButton.setImageResource(com.example.masdeporte.R.drawable.baseline_favorite_24)
-                isFavorite = true // Actualizar la variable de estado
+                isFavorite = true
             }
         }
     }
+
+    val viewReviewsButton = Button(context)
+    viewReviewsButton.text = "Ver reseñas"
+    viewReviewsButton.setOnClickListener {
+        showReviewsDialog(context, title, markerId, userEmail)
+    }
+    addMarginBottom(viewReviewsButton)
+    layout.addView(viewReviewsButton)
 
     builder.setView(layout)
 
     val firestore = FirebaseFirestore.getInstance()
     val favoritesCollection = firestore.collection("favorites")
 
-    // Verificar si el usuario tiene un documento en la colección "favorites"
     favoritesCollection
         .whereEqualTo("email", userEmail)
         .get()
         .addOnSuccessListener { documents ->
             if (documents.isEmpty) {
-                // Si el usuario no tiene un documento en la colección "favorites", crear uno nuevo
                 val data = hashMapOf(
                     "email" to userEmail,
                     "favorites" to emptyList<String>()
@@ -368,7 +373,7 @@ fun removeMarkerFromFavorites(markerId: String, userEmail: String) {
         }
 }
 
-private fun addMarginBottom(view: View) {
+fun addMarginBottom(view: View) {
     val layoutParams = LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.WRAP_CONTENT
@@ -376,7 +381,7 @@ private fun addMarginBottom(view: View) {
     layoutParams.setMargins(0, 0, 0, 50)
     view.layoutParams = layoutParams
 }
-private fun addMarginBottomAndTop(view: View) {
+fun addMarginBottomAndTop(view: View) {
     val layoutParams = LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.WRAP_CONTENT
@@ -426,3 +431,82 @@ suspend fun loadMarkersFromDatabase(): List<Map<String, Any>> = withContext(Disp
 
     markers
 }
+
+private fun showReviewsDialog(context: Context, title: String, markerId: String, userEmail: String) {
+    val builder = AlertDialog.Builder(context)
+    builder.setTitle("Reseñas de $title")
+
+    val layout = LinearLayout(context)
+    layout.orientation = LinearLayout.VERTICAL
+
+    val firestore = FirebaseFirestore.getInstance()
+    val reviewsCollection = firestore.collection("reviews")
+
+    reviewsCollection
+        .whereEqualTo("markerId", markerId)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (documents.isEmpty) {
+                val noReviewsTextView = TextView(context)
+                noReviewsTextView.text = "No hay reseñas todavía."
+                noReviewsTextView.gravity = Gravity.CENTER
+                layout.addView(noReviewsTextView)
+            } else {
+                for (document in documents) {
+                    val reviewText = document.getString("review")
+                    val reviewUserEmail = document.getString("userEmail")
+
+                    val reviewTextView = TextView(context)
+                    reviewTextView.text = "($reviewUserEmail) - $reviewText"
+                    addMarginBottom(reviewTextView)
+                    layout.addView(reviewTextView)
+                }
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al obtener las reseñas", e)
+        }
+
+    val newReviewEditText = EditText(context)
+    newReviewEditText.hint = "Escribe tu reseña aquí"
+    layout.addView(newReviewEditText)
+    addMarginBottomAndTop(newReviewEditText)
+
+    builder.setView(layout)
+
+    builder.setPositiveButton("Agregar reseña") { _, _ ->
+        val markerId = markerId
+        val review = newReviewEditText.text.toString()
+        val userEmail = userEmail
+
+        addReviewToDatabase(markerId, review, userEmail)
+    }
+
+    builder.setNegativeButton("Cancelar") { dialog, _ ->
+        dialog.cancel()
+    }
+
+    builder.show()
+}
+
+private fun addReviewToDatabase(markerId: String, reviewText: String, userEmail: String) {
+    val firestore = FirebaseFirestore.getInstance()
+    val reviewsCollection = firestore.collection("reviews")
+
+    val reviewData = hashMapOf(
+        "markerId" to markerId,
+        "review" to reviewText,
+        "userEmail" to userEmail
+    )
+
+    reviewsCollection
+        .add(reviewData)
+        .addOnSuccessListener { documentReference ->
+            Log.d("MasDeporte", "Reseña agregada con ID: ${documentReference.id}")
+        }
+        .addOnFailureListener { e ->
+            Log.e("MasDeporte", "Error al agregar reseña", e)
+        }
+}
+
+
