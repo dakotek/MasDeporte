@@ -1,5 +1,13 @@
 package com.example.masdeporte.models
 
+/**
+ * Clase de datos que representa un usuario.
+ *
+ * @property id Identificador único del usuario (opcional).
+ * @property userId Identificador único del usuario.
+ * @property name Nombre del usuario.
+ * @property userType Tipo de usuario ("ADMIN" o "STANDARD").
+ */
 data class User(
     val id:String?,
     val userId: String,

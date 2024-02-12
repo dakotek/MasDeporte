@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
         try {
             super.onCreate(savedInstanceState)
 
+            // Inicialización de la base de datos Room
             database = Room.databaseBuilder(
                 applicationContext,
                 AppDatabase::class.java,
@@ -38,8 +39,10 @@ class MainActivity : ComponentActivity() {
 
             setContent {
                 MasDeporteTheme {
+                    // Controlador de navegación
                     val navController = rememberNavController()
 
+                    // Definición de las pantallas y sus rutas en el NavHost
                     NavHost(navController, startDestination = "main") {
                         // Pantalla "Main"
                         composable("main") {
